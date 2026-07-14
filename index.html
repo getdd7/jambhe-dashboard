@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JTC Jambhe Centre — Readiness Dashboard</title>
+<style>
+  :root{
+    --bg:#f5f3ee; --surface:#ffffff; --surface2:#faf8f4; --text:#2b2620; --muted:#7a736a;
+    --border:#e5e0d6; --accent:#b3541e; --accent-soft:#f6e3d5; --gold:#c99a2e;
+    --green:#2e7d4f; --green-soft:#ddefe4; --blue:#2f6db3; --blue-soft:#dfeaf7;
+    --amber:#a06a00; --amber-soft:#f7ecd2; --grey-soft:#eceae4; --red:#b3402e; --red-soft:#f6ddd8;
+    --shadow:0 2px 12px rgba(60,50,30,.08);
+  }
+  [data-theme="dark"]{
+    --bg:#171512; --surface:#211e1a; --surface2:#2a2620; --text:#ece7de; --muted:#a29a8d;
+    --border:#3a352c; --accent:#e08a4e; --accent-soft:#3d2a1c; --gold:#d9b054;
+    --green:#6fc493; --green-soft:#1e3328; --blue:#7aaede; --blue-soft:#1e2c3d;
+    --amber:#e0b45c; --amber-soft:#3a2f16; --grey-soft:#33302a; --red:#e0705c; --red-soft:#3d221d;
+    --shadow:0 2px 12px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .3s,color .3s;}
+  .sans{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+  button, input, select, textarea{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; font-size:14px;}
+
+  /* ---------- Login ---------- */
+  #loginScreen{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:100;}
+  .login-card{background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); padding:44px 40px; width:min(420px,92vw); text-align:center;}
+  .login-card .wheel{font-size:44px; margin-bottom:10px;}
+  .login-card h1{font-size:22px; margin-bottom:4px;}
+  .login-card p{color:var(--muted); font-size:14px; margin-bottom:24px;}
+  .login-card input{width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:10px; background:var(--surface2); color:var(--text); margin-bottom:14px;}
+  .login-card button{width:100%; padding:12px; border:none; border-radius:10px; background:var(--accent); color:#fff; font-size:15px; cursor:pointer; font-weight:600;}
+  .login-card button:hover{filter:brightness(1.08);}
+  .login-err{color:var(--red); font-size:13px; min-height:18px; margin-bottom:6px;}
+  .login-note{font-size:12px; color:var(--muted); margin-top:18px; line-height:1.5;}
+
+  /* ---------- Layout ---------- */
+  header{background:var(--surface); border-bottom:1px solid var(--border); padding:14px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; position:sticky; top:0; z-index:20;}
+  header .title{display:flex; align-items:center; gap:12px;}
+  header .title .wheel{font-size:28px;}
+  header h1{font-size:19px; font-weight:600;}
+  header .sub{font-size:12px; color:var(--muted); font-family:sans-serif;}
+  .spacer{flex:1;}
+  .userchip{display:flex; align-items:center; gap:8px; background:var(--surface2); border:1px solid var(--border); border-radius:999px; padding:5px 12px; font-size:13px; font-family:sans-serif;}
+  .role-badge{font-size:11px; padding:2px 8px; border-radius:999px; font-weight:700; letter-spacing:.4px;}
+  .role-admin{background:var(--accent-soft); color:var(--accent);}
+  .role-viewer{background:var(--grey-soft); color:var(--muted);}
+  .iconbtn{border:1px solid var(--border); background:var(--surface2); color:var(--text); border-radius:10px; padding:7px 12px; cursor:pointer; font-size:13px;}
+  .iconbtn:hover{border-color:var(--accent); color:var(--accent);}
+
+  /* theme switch */
+  .switch{position:relative; width:52px; height:26px; cursor:pointer;}
+  .switch input{display:none;}
+  .slider{position:absolute; inset:0; background:var(--grey-soft); border:1px solid var(--border); border-radius:999px; transition:.3s;}
+  .slider:before{content:"☀️"; font-size:13px; line-height:22px; text-align:center; position:absolute; height:22px; width:22px; left:2px; top:1px; background:var(--surface); border-radius:50%; transition:.3s; box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .switch input:checked + .slider:before{transform:translateX(25px); content:"🌙";}
+
+  main{max-width:1200px; margin:0 auto; padding:22px 24px 60px;}
+
+  /* tabs */
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px;}
+  .tab{border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:8px 16px; cursor:pointer; font-size:13.5px; transition:.15s;}
+  .tab:hover{border-color:var(--accent);}
+  .tab.active{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600;}
+  .tab .cnt{opacity:.7; font-size:11.5px; margin-left:4px;}
+
+  /* overview */
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:24px;}
+  .kpi{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow);}
+  .kpi .num{font-size:26px; font-weight:700;}
+  .kpi .lbl{font-size:12px; color:var(--muted); font-family:sans-serif; margin-top:3px; text-transform:uppercase; letter-spacing:.5px;}
+  .seg-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px;}
+  .seg-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); cursor:pointer; transition:.15s;}
+  .seg-card:hover{border-color:var(--accent); transform:translateY(-2px);}
+  .seg-card h3{font-size:16px; margin-bottom:6px;}
+  .seg-card .meta{font-size:12.5px; color:var(--muted); font-family:sans-serif; display:flex; justify-content:space-between; margin-bottom:8px;}
+  .bar{height:8px; background:var(--grey-soft); border-radius:999px; overflow:hidden;}
+  .bar > div{height:100%; background:linear-gradient(90deg,var(--gold),var(--green)); border-radius:999px;}
+
+  /* segment view */
+  .seg-head{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px;}
+  .seg-head h2{font-size:21px;}
+  .seg-head .totals{font-size:13px; color:var(--muted); font-family:sans-serif;}
+  .searchbox{padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); width:220px;}
+  .addbtn{background:var(--green); color:#fff; border:none; border-radius:10px; padding:9px 16px; cursor:pointer; font-weight:600;}
+  .addbtn:hover{filter:brightness(1.1);}
+  .seg-note{background:var(--amber-soft); color:var(--amber); border-radius:10px; padding:10px 14px; font-size:13px; font-family:sans-serif; margin-bottom:14px;}
+
+  .tablewrap{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow-x:auto; box-shadow:var(--shadow);}
+  table{width:100%; border-collapse:collapse; font-family:sans-serif; font-size:13.5px; min-width:820px;}
+  th{background:var(--surface2); text-align:left; padding:11px 14px; font-size:11.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); border-bottom:1px solid var(--border); white-space:nowrap;}
+  td{padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface2);}
+  td.taskname{font-weight:600;}
+  td.cost{white-space:nowrap; text-align:right;}
+  td.notes{color:var(--muted); font-size:12.5px; max-width:320px;}
+  .badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap;}
+  .st-Proposed{background:var(--grey-soft); color:var(--muted);}
+  .st-Approved{background:var(--blue-soft); color:var(--blue);}
+  .st-InProgress{background:var(--amber-soft); color:var(--amber);}
+  .st-Ordered{background:var(--accent-soft); color:var(--accent);}
+  .st-Completed{background:var(--green-soft); color:var(--green);}
+  .st-OnHold{background:var(--red-soft); color:var(--red);}
+  .rowbtn{border:none; background:none; cursor:pointer; font-size:15px; padding:2px 5px; opacity:.65;}
+  .rowbtn:hover{opacity:1;}
+  tfoot td{font-weight:700; background:var(--surface2);}
+
+  /* modal */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:50; padding:16px;}
+  .overlay.show{display:flex;}
+  .modal{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px; width:min(520px,94vw); max-height:90vh; overflow-y:auto; box-shadow:var(--shadow);}
+  .modal h3{margin-bottom:16px; font-size:18px;}
+  .field{margin-bottom:13px;}
+  .field label{display:block; font-size:12px; color:var(--muted); font-family:sans-serif; margin-bottom:5px; text-transform:uppercase; letter-spacing:.5px;}
+  .field input,.field select,.field textarea{width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:9px; background:var(--surface2); color:var(--text);}
+  .field textarea{resize:vertical; min-height:60px;}
+  .modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:18px;}
+  .btn-secondary{background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:9px; padding:9px 16px; cursor:pointer;}
+  .btn-primary{background:var(--accent); border:none; color:#fff; border-radius:9px; padding:9px 18px; cursor:pointer; font-weight:600;}
+  .btn-danger{background:var(--red); border:none; color:#fff; border-radius:9px; padding:9px 16px; cursor:pointer;}
+
+  .admin-list{list-style:none; margin:8px 0;}
+  .admin-list li{display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:var(--surface2); border-radius:8px; margin-bottom:6px; font-family:sans-serif; font-size:13.5px;}
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--text); color:var(--bg); padding:10px 20px; border-radius:999px; font-family:sans-serif; font-size:13.5px; opacity:0; transition:.3s; pointer-events:none; z-index:60;}
+  .toast.show{opacity:1;}
+  footer{text-align:center; color:var(--muted); font-size:12px; font-family:sans-serif; padding:20px;}
+  @media (max-width:640px){ header{padding:12px 14px;} main{padding:16px 12px 50px;} .searchbox{width:100%;} }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="wheel">☸️</div>
+    <h1>JTC Jambhe Centre</h1>
+    <p>Operational Readiness Dashboard</p>
+    <input type="email" id="loginEmail" placeholder="Enter your email address" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-err" id="loginErr"></div>
+    <button onclick="doLogin()">Sign in</button>
+    <div class="login-note">Admins can add &amp; update tasks.<br>All other team members get view-only access.</div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" style="display:none">
+<header>
+  <div class="title">
+    <span class="wheel">☸️</span>
+    <div>
+      <h1>Jambhe Centre Readiness</h1>
+      <div class="sub">Dhamma Centre operational readiness tracker</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="userchip"><span id="userEmailChip"></span><span class="role-badge" id="roleBadge"></span></div>
+  <label class="switch" title="Toggle dark / light mode"><input type="checkbox" id="themeToggle" onchange="toggleTheme()"><span class="slider"></span></label>
+  <button class="iconbtn" id="adminPanelBtn" onclick="openAdminPanel()" style="display:none">⚙️ Admins</button>
+  <button class="iconbtn" onclick="exportJSON()" title="Download data backup">⬇ Backup</button>
+  <button class="iconbtn" id="importBtn" onclick="document.getElementById('importFile').click()" style="display:none" title="Load data backup">⬆ Restore</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+  <button class="iconbtn" onclick="exportCSV()" title="Export all tasks as CSV">CSV</button>
+  <button class="iconbtn" onclick="logout()">Logout</button>
+</header>
+
+<main>
+  <div class="tabs" id="tabs"></div>
+  <div id="content"></div>
+</main>
+<footer>Data is saved in this browser. Use <b>Backup</b> / <b>Restore</b> to share updates between team members. · Bhavatu Sabba Maṅgalaṁ 🙏</footer>
+</div>
+
+<!-- ============ TASK MODAL ============ -->
+<div class="overlay" id="taskOverlay">
+  <div class="modal">
+    <h3 id="taskModalTitle">Add Task</h3>
+    <div class="field"><label>Task *</label><input id="f_task"></div>
+    <div class="field"><label>Segment</label><select id="f_segment"></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label>Owner</label><input id="f_owner" placeholder="TBA"></div>
+      <div class="field"><label>Stage</label><select id="f_stage"></select></div>
+      <div class="field"><label>Proposed date</label><input type="date" id="f_proposed"></div>
+      <div class="field"><label>Due date</label><input type="date" id="f_due"></div>
+    </div>
+    <div class="field"><label>Estimated / actual cost (₹)</label><input type="number" id="f_cost" min="0" step="1" placeholder="0"></div>
+    <div class="field"><label>Notes</label><textarea id="f_notes"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="deleteTaskBtn" style="display:none;margin-right:auto" onclick="deleteTask()">Delete</button>
+      <button class="btn-secondary" onclick="closeModal('taskOverlay')">Cancel</button>
+      <button class="btn-primary" onclick="saveTask()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADMIN PANEL ============ -->
+<div class="overlay" id="adminOverlay">
+  <div class="modal">
+    <h3>Admin access</h3>
+    <p style="font-size:13px;color:var(--muted);font-family:sans-serif;margin-bottom:10px">These email addresses can add and update tasks:</p>
+    <ul class="admin-list" id="adminList"></ul>
+    <div style="display:flex;gap:8px">
+      <input id="newAdminEmail" placeholder="email@example.com" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text)">
+      <button class="btn-primary" onclick="addAdmin()">Add</button>
+    </div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('adminOverlay')">Close</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================
+   CONFIGURATION
+   ===================================================== */
+const DEFAULT_ADMINS = [
+  "getdeepakdeshpande@gmail.com",
+  "jtccoreteam@gmail.com"
+];
+const STAGES = ["Proposed","Approved","Ordered","InProgress","Completed","OnHold"];
+const STAGE_LABELS = {Proposed:"Proposed",Approved:"Approved",Ordered:"Ordered",InProgress:"In Progress",Completed:"Completed",OnHold:"On Hold"};
+const DATA_VERSION = 1;
+
+/* =====================================================
+   SEED DATA — imported from "Checklist for Jambhe Center
+   Readiness" Google Sheet (14-Jul-2026)
+   ===================================================== */
+const SEED = {
+  version: DATA_VERSION,
+  segments: [
+    {name:"Dhamma Hall", note:""},
+    {name:"Mini Dhamma Hall", note:"The mini Dhamma Hall was inspected and has a sitting capacity of 30–40 students."},
+    {name:"Residence", note:""},
+    {name:"AT Room", note:""},
+    {name:"Dining", note:""},
+    {name:"Management Office", note:""},
+    {name:"Network", note:""},
+    {name:"Garden & Parking", note:""},
+    {name:"Utilities", note:""}
+  ],
+  tasks: [
+    /* Residence */
+    t("Residence","Beds","2026-05-17"),
+    t("Residence","Mattress","2026-05-17"),
+    t("Residence","Water Filter","2026-05-17"),
+    t("Residence","Blankets",""),
+    t("Residence","Mosquito Nets",""),
+    t("Residence","Floor Mat",""),
+    t("Residence","Buckets for Bathroom","","2 buckets in each room"),
+    t("Residence","Mug for Bathroom","","2 mugs in each bathroom"),
+    t("Residence","Zadu / Broom and Pan",""),
+    /* Dhamma Hall */
+    t("Dhamma Hall","Stand-by ceiling fans","2026-05-17","In case large fan not working or not needed for some time"),
+    t("Dhamma Hall","Digital Clock","2026-05-17"),
+    t("Dhamma Hall","Sound Mixer and Mic System","2026-05-17"),
+    t("Dhamma Hall","Projector and Screen","2026-05-17"),
+    t("Dhamma Hall","Sound Speakers","2026-05-17"),
+    t("Dhamma Hall","UPS power backup for the Hall","2026-05-17"),
+    t("Dhamma Hall","AT Tablets","2026-05-17"),
+    t("Dhamma Hall","Chairs for Goenkaji and Mataji","2026-05-17","Have to confirm with Pratibha Ma'am if required"),
+    t("Dhamma Hall","Deshna Mobiles","2026-05-17","Deshna phones for foreign students and non-Hindi/English speaking students"),
+    t("Dhamma Hall","Runners","2026-05-17","Runners for walkways in the Dhamma Hall"),
+    t("Dhamma Hall","Carpet","2026-05-17","Carpet in front of the teachers' seats for sevaks and students"),
+    t("Dhamma Hall","Shoe Racks","2026-05-17","Shoe racks outside Dhamma Hall"),
+    /* AT Room */
+    t("AT Room","Beds","2026-05-17","2 beds in male and female AT rooms"),
+    t("AT Room","Mattress","2026-05-17","2 mattresses, pillows and linen"),
+    t("AT Room","Table","2026-05-17","2 tables"),
+    t("AT Room","Cupboard","2026-05-17","2 cupboards"),
+    t("AT Room","Internet","2026-05-17"),
+    t("AT Room","Bucket",""),
+    t("AT Room","Mug",""),
+    t("AT Room","Floor Mat",""),
+    t("AT Room","Zadu / Broom and Pan",""),
+    /* Dining */
+    t("Dining","Cooking Stove","2026-05-17","Needs further discussion"),
+    t("Dining","Cooking Utensils","2026-05-17","Needs further discussion"),
+    t("Dining","Steel Tables","2026-05-17","Needs further discussion"),
+    t("Dining","Shoe Racks","2026-05-17","2 shoe racks outside the dining entrances"),
+    t("Dining","Roof on cleaning and washing area","2026-05-17","Washing area is completely exposed to sun and rain; needs to be covered so the helper can work in all weathers"),
+    t("Dining","Drinking Water Filter","2026-05-17"),
+    t("Dining","Zadu / Broom and Pan",""),
+    t("Dining","Mopping instrument",""),
+    t("Dining","Fridge","","To store food items"),
+    /* Network */
+    t("Network","ISP Router","2026-05-17"),
+    t("Network","Wi-Fi Extension","2026-05-17","Wi-Fi extension needed to AT Room and for collection of Daana card payments"),
+    t("Network","Switch","2026-05-17","Needed to connect to the printer"),
+    /* Mini Dhamma Hall */
+    t("Mini Dhamma Hall","Fans and Lights","2026-05-17","Some are not working, needs cleaning"),
+    t("Mini Dhamma Hall","Shed for the open terraces","2026-05-17","Can be used during breaks for male and female, for one-day course while teenager course is in progress"),
+    t("Mini Dhamma Hall","Window for AT room","2026-05-17","AT room window is open, needs a window pane installed"),
+    t("Mini Dhamma Hall","Mini Audio Speaker and Tab","2026-05-17","For conducting 1-day courses and group sittings"),
+    t("Mini Dhamma Hall","TV or Projector","2026-05-17","Will be used for playing English discourses"),
+    /* Garden & Parking */
+    t("Garden & Parking","Parking Planning and Allocation","2026-05-17","Proposed by Deepak Deshpande"),
+    t("Garden & Parking","Walking Area Planning","2026-05-17"),
+    t("Garden & Parking","Trees and Plants Plantation","2026-05-17"),
+    t("Garden & Parking","Irrigation for the Gardens","2026-05-17"),
+    t("Garden & Parking","Pavement Extension","2026-05-17"),
+    t("Garden & Parking","Course Demarcation","2026-05-17"),
+    t("Garden & Parking","CCTV Camera","","For security"),
+    t("Garden & Parking","Snake Catcher Instrument","","Markal have one instrument — in case they see a snake they catch it and release it outside the campus"),
+    /* Utilities */
+    t("Utilities","12 to 14 feet Ladder","2026-05-17","Will need this for maintenance and cleaning activity"),
+    t("Utilities","Water Supply","2026-05-17","We need to look at the sources to get water for the centre operation"),
+    t("Utilities","Power Backup","2026-05-17","Power backup needed during power cuts, which are common in Jambhe"),
+    t("Utilities","Permanent Staff","2026-05-17","Staff needed for cleaning utensils, public toilets, pathways etc."),
+    t("Utilities","CCTV Camera Setup","","For safety"),
+    /* Management Office */
+    t("Management Office","Ladder","2026-05-17","12 to 14 feet ladder for maintenance and cleaning activity"),
+    t("Management Office","Tables","2026-05-17","2 tables"),
+    t("Management Office","Chairs","2026-05-17","4–6 chairs"),
+    t("Management Office","Cupboard","2026-05-17","1–2 cupboards"),
+    t("Management Office","Stationery","2026-05-17","Office stationery"),
+    t("Management Office","PC / Laptop","2026-05-17","1–2 laptops"),
+    t("Management Office","Printer","2026-05-17"),
+    t("Management Office","Internet","2026-05-17"),
+    t("Management Office","Centre Phone","2026-05-17"),
+    t("Management Office","Locker","2026-05-17","For storage of Amanat"),
+    t("Management Office","First Aid & Medical Supplies","2026-05-17"),
+    t("Management Office","Card Reading Machine","2026-05-17","Card reading and scanner for Daana collection"),
+    t("Management Office","Shed","2026-05-17","Shed at the entrance")
+  ]
+};
+function t(segment, task, proposed, notes){
+  return {id:"s"+Math.random().toString(36).slice(2,10), segment, task, owner:"TBA", stage:"Proposed", proposed:proposed||"", due:"", cost:0, notes:notes||""};
+}
+
+/* =====================================================
+   STATE
+   ===================================================== */
+const LS_DATA="jtc_dashboard_data", LS_THEME="jtc_theme", LS_USER="jtc_user", LS_ADMINS="jtc_admins";
+let state, currentTab="Overview", currentUser=null, editingId=null, searchQ="";
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_DATA);
+    if(raw){ const d=JSON.parse(raw); if(d && d.tasks) return d; }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(SEED));
+}
+function saveState(){ localStorage.setItem(LS_DATA, JSON.stringify(state)); }
+function getAdmins(){
+  try{ const a=JSON.parse(localStorage.getItem(LS_ADMINS)); if(Array.isArray(a)&&a.length) return a; }catch(e){}
+  return [...DEFAULT_ADMINS];
+}
+function saveAdmins(a){ localStorage.setItem(LS_ADMINS, JSON.stringify(a)); }
+function isAdmin(){ return currentUser && getAdmins().includes(currentUser.toLowerCase()); }
+
+/* =====================================================
+   AUTH
+   ===================================================== */
+function doLogin(){
+  const em = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const err = document.getElementById("loginErr");
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ err.textContent="Please enter a valid email address."; return; }
+  err.textContent="";
+  currentUser = em;
+  localStorage.setItem(LS_USER, em);
+  enterApp();
+}
+function logout(){
+  localStorage.removeItem(LS_USER);
+  currentUser=null;
+  document.getElementById("app").style.display="none";
+  document.getElementById("loginScreen").style.display="flex";
+  document.getElementById("loginEmail").value="";
+}
+function enterApp(){
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("app").style.display="block";
+  document.getElementById("userEmailChip").textContent=currentUser;
+  const rb=document.getElementById("roleBadge");
+  rb.textContent = isAdmin() ? "ADMIN":"VIEWER";
+  rb.className = "role-badge " + (isAdmin() ? "role-admin":"role-viewer");
+  document.getElementById("adminPanelBtn").style.display = isAdmin() ? "":"none";
+  document.getElementById("importBtn").style.display = isAdmin() ? "":"none";
+  render();
+}
+
+/* =====================================================
+   THEME
+   ===================================================== */
+function applyTheme(th){
+  document.documentElement.setAttribute("data-theme", th);
+  document.getElementById("themeToggle").checked = (th==="dark");
+  localStorage.setItem(LS_THEME, th);
+}
+function toggleTheme(){ applyTheme(document.getElementById("themeToggle").checked ? "dark":"light"); }
+
+/* =====================================================
+   HELPERS
+   ===================================================== */
+const esc = s => String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inr = n => n>0 ? "₹ "+Number(n).toLocaleString("en-IN") : "—";
+const fmtDate = d => { if(!d) return "—"; const dt=new Date(d+"T00:00:00"); return isNaN(dt)?d:dt.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}); };
+function toast(msg){ const el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),2200); }
+function segTasks(name){ return state.tasks.filter(x=>x.segment===name); }
+
+/* =====================================================
+   RENDER
+   ===================================================== */
+function render(){
+  renderTabs();
+  if(currentTab==="Overview") renderOverview(); else renderSegment(currentTab);
+}
+function renderTabs(){
+  const el=document.getElementById("tabs");
+  let html = `<button class="tab ${currentTab==="Overview"?"active":""}" onclick="switchTab('Overview')">📊 Overview</button>`;
+  for(const s of state.segments){
+    const n=segTasks(s.name).length;
+    html += `<button class="tab ${currentTab===s.name?"active":""}" onclick="switchTab('${esc(s.name).replace(/'/g,"\\'")}')">${esc(s.name)}<span class="cnt">${n}</span></button>`;
+  }
+  el.innerHTML=html;
+}
+function switchTab(name){ currentTab=name; searchQ=""; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+
+function renderOverview(){
+  const total=state.tasks.length;
+  const done=state.tasks.filter(x=>x.stage==="Completed").length;
+  const prog=state.tasks.filter(x=>x.stage==="InProgress"||x.stage==="Ordered").length;
+  const cost=state.tasks.reduce((a,x)=>a+(Number(x.cost)||0),0);
+  const spent=state.tasks.filter(x=>x.stage==="Completed").reduce((a,x)=>a+(Number(x.cost)||0),0);
+  let html=`<div class="kpis">
+    <div class="kpi"><div class="num">${total}</div><div class="lbl">Total tasks</div></div>
+    <div class="kpi"><div class="num" style="color:var(--green)">${done}</div><div class="lbl">Completed</div></div>
+    <div class="kpi"><div class="num" style="color:var(--amber)">${prog}</div><div class="lbl">In progress / ordered</div></div>
+    <div class="kpi"><div class="num" style="color:var(--accent)">${total-done-prog}</div><div class="lbl">Pending</div></div>
+    <div class="kpi"><div class="num">${inr(cost)}</div><div class="lbl">Total est. cost</div></div>
+    <div class="kpi"><div class="num" style="color:var(--green)">${inr(spent)}</div><div class="lbl">Cost of completed</div></div>
+  </div><div class="seg-grid">`;
+  for(const s of state.segments){
+    const ts=segTasks(s.name);
+    const d=ts.filter(x=>x.stage==="Completed").length;
+    const c=ts.reduce((a,x)=>a+(Number(x.cost)||0),0);
+    const pct=ts.length?Math.round(d/ts.length*100):0;
+    html+=`<div class="seg-card" onclick="switchTab('${esc(s.name).replace(/'/g,"\\'")}')">
+      <h3>${esc(s.name)}</h3>
+      <div class="meta"><span>${d}/${ts.length} done · ${pct}%</span><span>${inr(c)}</span></div>
+      <div class="bar"><div style="width:${pct}%"></div></div>
+    </div>`;
+  }
+  html+="</div>";
+  document.getElementById("content").innerHTML=html;
+}
+
+function renderSegment(name){
+  const seg=state.segments.find(s=>s.name===name);
+  let ts=segTasks(name);
+  const totalCost=ts.reduce((a,x)=>a+(Number(x.cost)||0),0);
+  if(searchQ){
+    const q=searchQ.toLowerCase();
+    ts=ts.filter(x=>(x.task+" "+x.owner+" "+x.notes+" "+x.stage).toLowerCase().includes(q));
+  }
+  const admin=isAdmin();
+  let html=`<div class="seg-head">
+    <h2>${esc(name)}</h2>
+    <span class="totals">${segTasks(name).length} tasks · total cost ${inr(totalCost)}</span>
+    <div class="spacer"></div>
+    <input class="searchbox" placeholder="🔍 Search tasks…" value="${esc(searchQ)}" oninput="searchQ=this.value;renderSegment('${esc(name).replace(/'/g,"\\'")}')">
+    ${admin?`<button class="addbtn" onclick="openAddTask('${esc(name).replace(/'/g,"\\'")}')">＋ Add Task</button>`:""}
+  </div>`;
+  if(seg && seg.note) html+=`<div class="seg-note">ℹ️ ${esc(seg.note)}</div>`;
+  html+=`<div class="tablewrap"><table><thead><tr>
+    <th>Task</th><th>Owner</th><th>Stage</th><th>Proposed</th><th>Due date</th><th style="text-align:right">Cost (₹)</th><th>Notes</th>${admin?"<th></th>":""}
+  </tr></thead><tbody>`;
+  if(!ts.length) html+=`<tr><td colspan="${admin?8:7}" style="text-align:center;color:var(--muted);padding:26px">No tasks${searchQ?" match your search":""}.</td></tr>`;
+  for(const x of ts){
+    html+=`<tr>
+      <td class="taskname">${esc(x.task)}</td>
+      <td>${esc(x.owner||"TBA")}</td>
+      <td><span class="badge st-${x.stage}">${STAGE_LABELS[x.stage]||esc(x.stage)}</span></td>
+      <td>${fmtDate(x.proposed)}</td>
+      <td>${fmtDate(x.due)}</td>
+      <td class="cost">${inr(x.cost)}</td>
+      <td class="notes">${esc(x.notes)}</td>
+      ${admin?`<td style="white-space:nowrap"><button class="rowbtn" title="Edit" onclick="openEditTask('${x.id}')">✏️</button></td>`:""}
+    </tr>`;
+  }
+  html+=`</tbody><tfoot><tr><td colspan="5">Segment total</td><td class="cost">${inr(totalCost)}</td><td></td>${admin?"<td></td>":""}</tr></tfoot></table></div>`;
+  document.getElementById("content").innerHTML=html;
+}
+
+/* =====================================================
+   TASK CRUD (admin)
+   ===================================================== */
+function fillModalSelects(){
+  document.getElementById("f_segment").innerHTML = state.segments.map(s=>`<option>${esc(s.name)}</option>`).join("");
+  document.getElementById("f_stage").innerHTML = STAGES.map(s=>`<option value="${s}">${STAGE_LABELS[s]}</option>`).join("");
+}
+function openAddTask(segName){
+  if(!isAdmin()) return;
+  editingId=null; fillModalSelects();
+  document.getElementById("taskModalTitle").textContent="Add Task";
+  document.getElementById("deleteTaskBtn").style.display="none";
+  f_task.value=""; f_owner.value="TBA"; f_notes.value=""; f_cost.value="";
+  f_proposed.value=new Date().toISOString().slice(0,10); f_due.value="";
+  f_segment.value=segName; f_stage.value="Proposed";
+  document.getElementById("taskOverlay").classList.add("show");
+}
+function openEditTask(id){
+  if(!isAdmin()) return;
+  const x=state.tasks.find(t=>t.id===id); if(!x) return;
+  editingId=id; fillModalSelects();
+  document.getElementById("taskModalTitle").textContent="Edit Task";
+  document.getElementById("deleteTaskBtn").style.display="";
+  f_task.value=x.task; f_segment.value=x.segment; f_owner.value=x.owner;
+  f_stage.value=x.stage; f_proposed.value=x.proposed; f_due.value=x.due;
+  f_cost.value=x.cost||""; f_notes.value=x.notes;
+  document.getElementById("taskOverlay").classList.add("show");
+}
+function saveTask(){
+  const name=f_task.value.trim();
+  if(!name){ toast("Task name is required"); return; }
+  const data={task:name, segment:f_segment.value, owner:f_owner.value.trim()||"TBA", stage:f_stage.value,
+    proposed:f_proposed.value, due:f_due.value, cost:Number(f_cost.value)||0, notes:f_notes.value.trim()};
+  if(editingId){ Object.assign(state.tasks.find(t=>t.id===editingId), data); toast("Task updated"); }
+  else{ state.tasks.push(Object.assign({id:"u"+Date.now().toString(36)}, data)); toast("Task added"); }
+  saveState(); closeModal("taskOverlay");
+  currentTab = data.segment; render();
+}
+function deleteTask(){
+  if(!editingId) return;
+  if(!confirm("Delete this task?")) return;
+  state.tasks = state.tasks.filter(t=>t.id!==editingId);
+  saveState(); closeModal("taskOverlay"); toast("Task deleted"); render();
+}
+function closeModal(id){ document.getElementById(id).classList.remove("show"); }
+
+/* =====================================================
+   ADMIN PANEL
+   ===================================================== */
+function openAdminPanel(){
+  if(!isAdmin()) return;
+  renderAdminList();
+  document.getElementById("adminOverlay").classList.add("show");
+}
+function renderAdminList(){
+  const admins=getAdmins();
+  document.getElementById("adminList").innerHTML = admins.map(a=>
+    `<li><span>${esc(a)}</span>${admins.length>1?`<button class="rowbtn" onclick="removeAdmin('${esc(a)}')">🗑️</button>`:""}</li>`).join("");
+}
+function addAdmin(){
+  const em=document.getElementById("newAdminEmail").value.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ toast("Invalid email"); return; }
+  const a=getAdmins();
+  if(!a.includes(em)) a.push(em);
+  saveAdmins(a); document.getElementById("newAdminEmail").value=""; renderAdminList(); toast("Admin added");
+}
+function removeAdmin(em){
+  let a=getAdmins().filter(x=>x!==em);
+  if(!a.length){ toast("At least one admin required"); return; }
+  saveAdmins(a); renderAdminList(); enterApp(); toast("Admin removed");
+}
+
+/* =====================================================
+   EXPORT / IMPORT
+   ===================================================== */
+function download(filename, text, type){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([text],{type}));
+  a.download=filename; a.click(); URL.revokeObjectURL(a.href);
+}
+function exportJSON(){
+  download("jambhe-dashboard-backup-"+new Date().toISOString().slice(0,10)+".json",
+    JSON.stringify({data:state, admins:getAdmins()}, null, 2), "application/json");
+  toast("Backup downloaded");
+}
+function importJSON(ev){
+  const file=ev.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+      const obj=JSON.parse(r.result);
+      if(obj.data && obj.data.tasks){ state=obj.data; saveState(); }
+      else if(obj.tasks){ state=obj; saveState(); }
+      else throw 0;
+      if(Array.isArray(obj.admins) && obj.admins.length) saveAdmins(obj.admins);
+      enterApp(); toast("Data restored");
+    }catch(e){ toast("Invalid backup file"); } };
+  r.readAsText(file);
+  ev.target.value="";
+}
+function exportCSV(){
+  const rows=[["Segment","Task","Owner","Stage","Proposed Date","Due Date","Cost (INR)","Notes"]];
+  for(const s of state.segments) for(const x of segTasks(s.name))
+    rows.push([x.segment,x.task,x.owner,STAGE_LABELS[x.stage]||x.stage,x.proposed,x.due,x.cost||0,x.notes]);
+  const csv=rows.map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  download("jambhe-centre-tasks.csv","﻿"+csv,"text/csv");
+  toast("CSV downloaded");
+}
+
+/* =====================================================
+   INIT
+   ===================================================== */
+state = loadState();
+applyTheme(localStorage.getItem(LS_THEME) || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark":"light"));
+const savedUser = localStorage.getItem(LS_USER);
+if(savedUser){ currentUser=savedUser; enterApp(); }
+</script>
+</body>
+</html>
