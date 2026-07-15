@@ -35,6 +35,7 @@
   .login-card button:hover{filter:brightness(1.08);}
   .login-err{color:var(--red); font-size:13px; min-height:18px; margin-bottom:6px;}
   .login-note{font-size:12px; color:var(--muted); margin-top:18px; line-height:1.5;}
+  .login-status{font-size:12px;color:var(--muted);margin-top:14px;}
 
   /* ---------- Layout ---------- */
   header{background:var(--surface); border-bottom:1px solid var(--border); padding:14px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; position:sticky; top:0; z-index:20;}
@@ -49,6 +50,8 @@
   .role-viewer{background:var(--grey-soft); color:var(--muted);}
   .iconbtn{border:1px solid var(--border); background:var(--surface2); color:var(--text); border-radius:10px; padding:7px 12px; cursor:pointer; font-size:13px;}
   .iconbtn:hover{border-color:var(--accent); color:var(--accent);}
+  .livedot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:5px;vertical-align:middle;}
+  .livedot.off{background:var(--muted);}
 
   /* theme switch */
   .switch{position:relative; width:52px; height:26px; cursor:pointer;}
@@ -67,10 +70,53 @@
   .tab .cnt{opacity:.7; font-size:11.5px; margin-left:4px;}
 
   /* overview */
-  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:24px;}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:20px;}
   .kpi{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow);}
   .kpi .num{font-size:26px; font-weight:700;}
   .kpi .lbl{font-size:12px; color:var(--muted); font-family:sans-serif; margin-top:3px; text-transform:uppercase; letter-spacing:.5px;}
+
+  .ov-row{display:grid; grid-template-columns:minmax(260px,1fr) minmax(300px,1.4fr); gap:14px; margin-bottom:20px;}
+  @media (max-width:820px){ .ov-row{grid-template-columns:1fr;} }
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; box-shadow:var(--shadow);}
+  .panel h3{font-size:15px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;}
+
+  /* donut chart */
+  .donut-wrap{display:flex; align-items:center; gap:20px; flex-wrap:wrap; justify-content:center;}
+  .donut{position:relative; width:158px; height:158px; border-radius:50%; flex:none;}
+  .donut::after{content:""; position:absolute; inset:26px; background:var(--surface); border-radius:50%;}
+  .donut .ctr{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2;}
+  .donut .ctr .big{font-size:30px; font-weight:700; color:var(--green);}
+  .donut .ctr .cap{font-size:11px; color:var(--muted); font-family:sans-serif; text-transform:uppercase; letter-spacing:.5px;}
+  .legend{font-family:sans-serif; font-size:13px;}
+  .legend div{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+  .dot{width:12px; height:12px; border-radius:3px; flex:none;}
+
+  /* calendar */
+  .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; font-family:sans-serif;}
+  .cal-head button{border:1px solid var(--border); background:var(--surface2); color:var(--text); border-radius:8px; width:30px; height:30px; cursor:pointer; font-size:15px;}
+  .cal-head button:hover{border-color:var(--accent); color:var(--accent);}
+  .cal-title{font-weight:600; font-size:14px;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; font-family:sans-serif;}
+  .cal-dow{font-size:10.5px; color:var(--muted); text-align:center; text-transform:uppercase; letter-spacing:.4px; padding:2px 0;}
+  .cal-cell{min-height:44px; border:1px solid var(--border); border-radius:8px; padding:4px; background:var(--surface2); cursor:default; position:relative;}
+  .cal-cell.empty{background:transparent; border-color:transparent;}
+  .cal-cell.today{border-color:var(--accent);}
+  .cal-cell.has{cursor:pointer;}
+  .cal-cell.sel{outline:2px solid var(--accent); outline-offset:-2px;}
+  .cal-cell .dnum{font-size:11px; color:var(--muted);}
+  .cal-dots{display:flex; gap:3px; flex-wrap:wrap; margin-top:3px;}
+  .cal-dot{width:7px; height:7px; border-radius:50%;}
+  .cal-dot.due{background:var(--red);}
+  .cal-dot.prop{background:var(--blue);}
+  .cal-legend{display:flex; gap:16px; font-family:sans-serif; font-size:11.5px; color:var(--muted); margin-top:10px;}
+  .cal-legend span{display:flex; align-items:center; gap:5px;}
+  .cal-daylist{margin-top:12px; font-family:sans-serif; font-size:13px;}
+  .cal-daylist .di{padding:7px 10px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; margin-bottom:6px; display:flex; gap:8px; align-items:center;}
+  .upcoming{margin-top:6px; font-family:sans-serif; font-size:13px;}
+  .upcoming .ui{padding:6px 0; border-bottom:1px dashed var(--border); display:flex; justify-content:space-between; gap:10px;}
+  .upcoming .ui:last-child{border-bottom:none;}
+  .upcoming .ud{color:var(--muted); white-space:nowrap;}
+
   .seg-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px;}
   .seg-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); cursor:pointer; transition:.15s;}
   .seg-card:hover{border-color:var(--accent); transform:translateY(-2px);}
@@ -83,20 +129,24 @@
   .seg-head{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px;}
   .seg-head h2{font-size:21px;}
   .seg-head .totals{font-size:13px; color:var(--muted); font-family:sans-serif;}
-  .searchbox{padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); width:220px;}
+  .searchbox{padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); width:200px;}
   .addbtn{background:var(--green); color:#fff; border:none; border-radius:10px; padding:9px 16px; cursor:pointer; font-weight:600;}
   .addbtn:hover{filter:brightness(1.1);}
   .seg-note{background:var(--amber-soft); color:var(--amber); border-radius:10px; padding:10px 14px; font-size:13px; font-family:sans-serif; margin-bottom:14px;}
 
   .tablewrap{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow-x:auto; box-shadow:var(--shadow);}
-  table{width:100%; border-collapse:collapse; font-family:sans-serif; font-size:13.5px; min-width:820px;}
+  table{width:100%; border-collapse:collapse; font-family:sans-serif; font-size:13.5px; min-width:880px;}
   th{background:var(--surface2); text-align:left; padding:11px 14px; font-size:11.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); border-bottom:1px solid var(--border); white-space:nowrap;}
+  th.sortable{cursor:pointer; user-select:none;}
+  th.sortable:hover{color:var(--accent);}
+  th .arrow{font-size:10px; opacity:.8;}
   td{padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:top;}
   tr:last-child td{border-bottom:none;}
   tbody tr:hover{background:var(--surface2);}
   td.taskname{font-weight:600;}
   td.cost{white-space:nowrap; text-align:right;}
-  td.notes{color:var(--muted); font-size:12.5px; max-width:320px;}
+  td.notes{color:var(--muted); font-size:12.5px; max-width:300px;}
+  td.prio{text-align:center;}
   .badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap;}
   .st-Proposed{background:var(--grey-soft); color:var(--muted);}
   .st-Approved{background:var(--blue-soft); color:var(--blue);}
@@ -104,6 +154,13 @@
   .st-Ordered{background:var(--accent-soft); color:var(--accent);}
   .st-Completed{background:var(--green-soft); color:var(--green);}
   .st-OnHold{background:var(--red-soft); color:var(--red);}
+  /* priority pills */
+  .pill{display:inline-block; width:30px; text-align:center; padding:3px 0; border-radius:8px; font-size:12px; font-weight:700;}
+  .pr1{background:var(--red-soft); color:var(--red);}
+  .pr2{background:var(--accent-soft); color:var(--accent);}
+  .pr3{background:var(--amber-soft); color:var(--amber);}
+  .pr4{background:var(--blue-soft); color:var(--blue);}
+  .pr5{background:var(--grey-soft); color:var(--muted);}
   .rowbtn{border:none; background:none; cursor:pointer; font-size:15px; padding:2px 5px; opacity:.65;}
   .rowbtn:hover{opacity:1;}
   tfoot td{font-weight:700; background:var(--surface2);}
@@ -142,6 +199,7 @@
     <div class="login-err" id="loginErr"></div>
     <button onclick="doLogin()">Sign in</button>
     <div class="login-note">Admins can add &amp; update tasks.<br>All other team members get view-only access.</div>
+    <div class="login-status" id="loginStatus"></div>
   </div>
 </div>
 
@@ -152,16 +210,14 @@
     <span class="wheel">☸️</span>
     <div>
       <h1>Jambhe Centre Readiness</h1>
-      <div class="sub">Dhamma Centre operational readiness tracker</div>
+      <div class="sub"><span class="livedot" id="liveDot"></span><span id="liveText">Live · synced to Google Sheet</span></div>
     </div>
   </div>
   <div class="spacer"></div>
   <div class="userchip"><span id="userEmailChip"></span><span class="role-badge" id="roleBadge"></span></div>
   <label class="switch" title="Toggle dark / light mode"><input type="checkbox" id="themeToggle" onchange="toggleTheme()"><span class="slider"></span></label>
+  <button class="iconbtn" id="refreshBtn" onclick="manualRefresh()" title="Reload latest from the sheet">↻ Refresh</button>
   <button class="iconbtn" id="adminPanelBtn" onclick="openAdminPanel()" style="display:none">⚙️ Admins</button>
-  <button class="iconbtn" onclick="exportJSON()" title="Download data backup">⬇ Backup</button>
-  <button class="iconbtn" id="importBtn" onclick="document.getElementById('importFile').click()" style="display:none" title="Load data backup">⬆ Restore</button>
-  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
   <button class="iconbtn" onclick="exportCSV()" title="Export all tasks as CSV">CSV</button>
   <button class="iconbtn" onclick="logout()">Logout</button>
 </header>
@@ -170,7 +226,7 @@
   <div class="tabs" id="tabs"></div>
   <div id="content"></div>
 </main>
-<footer>Data is saved in this browser. Use <b>Backup</b> / <b>Restore</b> to share updates between team members. · Bhavatu Sabba Maṅgalaṁ 🙏</footer>
+<footer>Live updates save straight to your Google Sheet — everyone sees changes on Refresh. · Bhavatu Sabba Maṅgalaṁ 🙏</footer>
 </div>
 
 <!-- ============ TASK MODAL ============ -->
@@ -178,17 +234,18 @@
   <div class="modal">
     <h3 id="taskModalTitle">Add Task</h3>
     <div class="field"><label>Task *</label><input id="f_task"></div>
-    <div class="field"><label>Segment</label><select id="f_segment"></select></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label>Segment</label><select id="f_segment"></select></div>
+      <div class="field"><label>Priority</label><select id="f_priority"></select></div>
       <div class="field"><label>Owner</label><input id="f_owner" placeholder="TBA"></div>
       <div class="field"><label>Stage</label><select id="f_stage"></select></div>
       <div class="field"><label>Proposed date</label><input type="date" id="f_proposed"></div>
-      <div class="field"><label>Due date</label><input type="date" id="f_due"></div>
+      <div class="field"><label>Due date (deadline)</label><input type="date" id="f_due"></div>
     </div>
     <div class="field"><label>Estimated / actual cost (₹)</label><input type="number" id="f_cost" min="0" step="1" placeholder="0"></div>
     <div class="field"><label>Notes</label><textarea id="f_notes"></textarea></div>
     <div class="modal-actions">
-      <button class="btn-danger" id="deleteTaskBtn" style="display:none;margin-right:auto" onclick="deleteTask()">Delete</button>
+      <button class="btn-danger" id="deleteTaskBtn" style="display:none;margin-right:auto" onclick="deleteTaskAction()">Delete</button>
       <button class="btn-secondary" onclick="closeModal('taskOverlay')">Cancel</button>
       <button class="btn-primary" onclick="saveTask()">Save</button>
     </div>
@@ -214,21 +271,26 @@
 <script>
 /* =====================================================
    CONFIGURATION
+   -----------------------------------------------------
+   After you deploy the Apps Script web app, paste its
+   /exec URL between the quotes below, then re-upload.
+   Leave it as-is to run in offline/demo mode.
    ===================================================== */
-const DEFAULT_ADMINS = [
-  "getdeepakdeshpande@gmail.com",
-  "jtccoreteam@gmail.com"
-];
+const API_URL = "https://script.google.com/macros/s/AKfycbzZFg4ft97038oyEhekXMZDIW0IvVDJVd-sqcBNaLTbmRbV8IgXsjYm0hdGQAJzJOtEjg/exec";
+const API_LIVE = /^https:\/\/script\.google\.com\/.*\/exec/.test(API_URL);
+
+const DEFAULT_ADMINS = ["getdeepakdeshpande@gmail.com","jtccoreteam@gmail.com"];
 const STAGES = ["Proposed","Approved","Ordered","InProgress","Completed","OnHold"];
 const STAGE_LABELS = {Proposed:"Proposed",Approved:"Approved",Ordered:"Ordered",InProgress:"In Progress",Completed:"Completed",OnHold:"On Hold"};
-const DATA_VERSION = 1;
+const PRIORITY_LABELS = {1:"1 · Highest",2:"2 · High",3:"3 · Medium",4:"4 · Low",5:"5 · Lowest"};
 
 /* =====================================================
-   SEED DATA — imported from "Checklist for Jambhe Center
-   Readiness" Google Sheet (14-Jul-2026)
+   SEED DATA — offline fallback (mirrors the sheet)
    ===================================================== */
+function t(segment, task, proposed, notes){
+  return {id:"s"+Math.random().toString(36).slice(2,10), segment, task, owner:"TBA", stage:"Proposed", priority:3, proposed:proposed||"", due:"", cost:0, notes:notes||""};
+}
 const SEED = {
-  version: DATA_VERSION,
   segments: [
     {name:"Dhamma Hall", note:""},
     {name:"Mini Dhamma Hall", note:"The mini Dhamma Hall was inspected and has a sitting capacity of 30–40 students."},
@@ -240,8 +302,8 @@ const SEED = {
     {name:"Garden & Parking", note:""},
     {name:"Utilities", note:""}
   ],
+  admins: [...DEFAULT_ADMINS],
   tasks: [
-    /* Residence */
     t("Residence","Beds","2026-05-17"),
     t("Residence","Mattress","2026-05-17"),
     t("Residence","Water Filter","2026-05-17"),
@@ -251,7 +313,6 @@ const SEED = {
     t("Residence","Buckets for Bathroom","","2 buckets in each room"),
     t("Residence","Mug for Bathroom","","2 mugs in each bathroom"),
     t("Residence","Zadu / Broom and Pan",""),
-    /* Dhamma Hall */
     t("Dhamma Hall","Stand-by ceiling fans","2026-05-17","In case large fan not working or not needed for some time"),
     t("Dhamma Hall","Digital Clock","2026-05-17"),
     t("Dhamma Hall","Sound Mixer and Mic System","2026-05-17"),
@@ -264,7 +325,6 @@ const SEED = {
     t("Dhamma Hall","Runners","2026-05-17","Runners for walkways in the Dhamma Hall"),
     t("Dhamma Hall","Carpet","2026-05-17","Carpet in front of the teachers' seats for sevaks and students"),
     t("Dhamma Hall","Shoe Racks","2026-05-17","Shoe racks outside Dhamma Hall"),
-    /* AT Room */
     t("AT Room","Beds","2026-05-17","2 beds in male and female AT rooms"),
     t("AT Room","Mattress","2026-05-17","2 mattresses, pillows and linen"),
     t("AT Room","Table","2026-05-17","2 tables"),
@@ -274,7 +334,6 @@ const SEED = {
     t("AT Room","Mug",""),
     t("AT Room","Floor Mat",""),
     t("AT Room","Zadu / Broom and Pan",""),
-    /* Dining */
     t("Dining","Cooking Stove","2026-05-17","Needs further discussion"),
     t("Dining","Cooking Utensils","2026-05-17","Needs further discussion"),
     t("Dining","Steel Tables","2026-05-17","Needs further discussion"),
@@ -284,17 +343,14 @@ const SEED = {
     t("Dining","Zadu / Broom and Pan",""),
     t("Dining","Mopping instrument",""),
     t("Dining","Fridge","","To store food items"),
-    /* Network */
     t("Network","ISP Router","2026-05-17"),
     t("Network","Wi-Fi Extension","2026-05-17","Wi-Fi extension needed to AT Room and for collection of Daana card payments"),
     t("Network","Switch","2026-05-17","Needed to connect to the printer"),
-    /* Mini Dhamma Hall */
     t("Mini Dhamma Hall","Fans and Lights","2026-05-17","Some are not working, needs cleaning"),
     t("Mini Dhamma Hall","Shed for the open terraces","2026-05-17","Can be used during breaks for male and female, for one-day course while teenager course is in progress"),
     t("Mini Dhamma Hall","Window for AT room","2026-05-17","AT room window is open, needs a window pane installed"),
     t("Mini Dhamma Hall","Mini Audio Speaker and Tab","2026-05-17","For conducting 1-day courses and group sittings"),
     t("Mini Dhamma Hall","TV or Projector","2026-05-17","Will be used for playing English discourses"),
-    /* Garden & Parking */
     t("Garden & Parking","Parking Planning and Allocation","2026-05-17","Proposed by Deepak Deshpande"),
     t("Garden & Parking","Walking Area Planning","2026-05-17"),
     t("Garden & Parking","Trees and Plants Plantation","2026-05-17"),
@@ -303,13 +359,11 @@ const SEED = {
     t("Garden & Parking","Course Demarcation","2026-05-17"),
     t("Garden & Parking","CCTV Camera","","For security"),
     t("Garden & Parking","Snake Catcher Instrument","","Markal have one instrument — in case they see a snake they catch it and release it outside the campus"),
-    /* Utilities */
     t("Utilities","12 to 14 feet Ladder","2026-05-17","Will need this for maintenance and cleaning activity"),
     t("Utilities","Water Supply","2026-05-17","We need to look at the sources to get water for the centre operation"),
     t("Utilities","Power Backup","2026-05-17","Power backup needed during power cuts, which are common in Jambhe"),
     t("Utilities","Permanent Staff","2026-05-17","Staff needed for cleaning utensils, public toilets, pathways etc."),
     t("Utilities","CCTV Camera Setup","","For safety"),
-    /* Management Office */
     t("Management Office","Ladder","2026-05-17","12 to 14 feet ladder for maintenance and cleaning activity"),
     t("Management Office","Tables","2026-05-17","2 tables"),
     t("Management Office","Chairs","2026-05-17","4–6 chairs"),
@@ -325,46 +379,88 @@ const SEED = {
     t("Management Office","Shed","2026-05-17","Shed at the entrance")
   ]
 };
-function t(segment, task, proposed, notes){
-  return {id:"s"+Math.random().toString(36).slice(2,10), segment, task, owner:"TBA", stage:"Proposed", proposed:proposed||"", due:"", cost:0, notes:notes||""};
-}
 
 /* =====================================================
    STATE
    ===================================================== */
-const LS_DATA="jtc_dashboard_data", LS_THEME="jtc_theme", LS_USER="jtc_user", LS_ADMINS="jtc_admins";
-let state, currentTab="Overview", currentUser=null, editingId=null, searchQ="";
+const LS_DATA="jtc_dashboard_data", LS_THEME="jtc_theme", LS_USER="jtc_user";
+let state={segments:[],tasks:[],admins:[]}, currentTab="Overview", currentUser=null, editingId=null, searchQ="";
+let sortKey="priority", sortDir=1;           // segment table sort (priority asc default)
+let calYear, calMonth, calSelected=null;     // calendar view state
 
-function loadState(){
+/* =====================================================
+   LIVE SYNC  (JSONP read · no-cors POST write)
+   ===================================================== */
+function apiRead(){
+  return new Promise((resolve,reject)=>{
+    const cb="jtc_cb_"+Math.random().toString(36).slice(2);
+    const s=document.createElement("script");
+    const timer=setTimeout(()=>{ cleanup(); reject(new Error("timeout")); },15000);
+    function cleanup(){ clearTimeout(timer); delete window[cb]; if(s.parentNode) s.remove(); }
+    window[cb]=(data)=>{ cleanup(); resolve(data); };
+    s.onerror=()=>{ cleanup(); reject(new Error("network")); };
+    s.src=API_URL+"?action=read&callback="+cb+"&_="+Date.now();
+    document.body.appendChild(s);
+  });
+}
+async function apiWrite(payload){
+  await fetch(API_URL,{method:"POST",mode:"no-cors",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(payload)});
+}
+function applyServer(d){
+  if(!d || !d.ok || !Array.isArray(d.tasks)) return false;
+  state={
+    segments: (d.segments&&d.segments.length)?d.segments:SEED.segments.map(s=>({...s})),
+    tasks: d.tasks,
+    admins: (d.admins&&d.admins.length)?d.admins:[...DEFAULT_ADMINS]
+  };
+  saveCache();
+  return true;
+}
+async function refreshFromServer(){
+  const d=await apiRead();
+  return applyServer(d);
+}
+async function manualRefresh(){
+  if(!API_LIVE){ toast("Offline demo mode"); return; }
+  const btn=document.getElementById("refreshBtn"); if(btn) btn.textContent="↻ …";
+  try{ await refreshFromServer(); toast("Latest data loaded"); }
+  catch(e){ toast("Could not reach the sheet"); }
+  if(btn) btn.textContent="↻ Refresh";
+  render();
+}
+// optimistic write: update UI now, persist to sheet, then reconcile
+async function persist(payload, optimistic){
+  if(optimistic) optimistic();
+  render();
+  if(!API_LIVE){ saveCache(); return; }
   try{
-    const raw = localStorage.getItem(LS_DATA);
-    if(raw){ const d=JSON.parse(raw); if(d && d.tasks) return d; }
-  }catch(e){}
+    await apiWrite(payload);
+    await refreshFromServer();
+  }catch(e){ toast("Saved locally — sync failed, will retry on Refresh"); }
+  render();
+}
+
+function saveCache(){ try{ localStorage.setItem(LS_DATA, JSON.stringify(state)); }catch(e){} }
+function loadCache(){
+  try{ const raw=localStorage.getItem(LS_DATA); if(raw){ const d=JSON.parse(raw); if(d&&d.tasks) return d; } }catch(e){}
   return JSON.parse(JSON.stringify(SEED));
 }
-function saveState(){ localStorage.setItem(LS_DATA, JSON.stringify(state)); }
-function getAdmins(){
-  try{ const a=JSON.parse(localStorage.getItem(LS_ADMINS)); if(Array.isArray(a)&&a.length) return a; }catch(e){}
-  return [...DEFAULT_ADMINS];
-}
-function saveAdmins(a){ localStorage.setItem(LS_ADMINS, JSON.stringify(a)); }
-function isAdmin(){ return currentUser && getAdmins().includes(currentUser.toLowerCase()); }
+function getAdmins(){ return (state.admins&&state.admins.length)?state.admins:[...DEFAULT_ADMINS]; }
+function isAdmin(){ return currentUser && getAdmins().map(a=>a.toLowerCase()).includes(currentUser.toLowerCase()); }
 
 /* =====================================================
    AUTH
    ===================================================== */
 function doLogin(){
-  const em = document.getElementById("loginEmail").value.trim().toLowerCase();
-  const err = document.getElementById("loginErr");
+  const em=document.getElementById("loginEmail").value.trim().toLowerCase();
+  const err=document.getElementById("loginErr");
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ err.textContent="Please enter a valid email address."; return; }
-  err.textContent="";
-  currentUser = em;
-  localStorage.setItem(LS_USER, em);
-  enterApp();
+  err.textContent=""; currentUser=em; localStorage.setItem(LS_USER,em); enterApp();
 }
 function logout(){
-  localStorage.removeItem(LS_USER);
-  currentUser=null;
+  localStorage.removeItem(LS_USER); currentUser=null;
   document.getElementById("app").style.display="none";
   document.getElementById("loginScreen").style.display="flex";
   document.getElementById("loginEmail").value="";
@@ -374,10 +470,12 @@ function enterApp(){
   document.getElementById("app").style.display="block";
   document.getElementById("userEmailChip").textContent=currentUser;
   const rb=document.getElementById("roleBadge");
-  rb.textContent = isAdmin() ? "ADMIN":"VIEWER";
-  rb.className = "role-badge " + (isAdmin() ? "role-admin":"role-viewer");
-  document.getElementById("adminPanelBtn").style.display = isAdmin() ? "":"none";
-  document.getElementById("importBtn").style.display = isAdmin() ? "":"none";
+  rb.textContent=isAdmin()?"ADMIN":"VIEWER";
+  rb.className="role-badge "+(isAdmin()?"role-admin":"role-viewer");
+  document.getElementById("adminPanelBtn").style.display=isAdmin()?"":"none";
+  const dot=document.getElementById("liveDot"), lt=document.getElementById("liveText");
+  if(API_LIVE){ dot.className="livedot"; lt.textContent="Live · synced to Google Sheet"; }
+  else{ dot.className="livedot off"; lt.textContent="Offline demo — not connected to the sheet yet"; }
   render();
 }
 
@@ -385,20 +483,21 @@ function enterApp(){
    THEME
    ===================================================== */
 function applyTheme(th){
-  document.documentElement.setAttribute("data-theme", th);
-  document.getElementById("themeToggle").checked = (th==="dark");
-  localStorage.setItem(LS_THEME, th);
+  document.documentElement.setAttribute("data-theme",th);
+  document.getElementById("themeToggle").checked=(th==="dark");
+  localStorage.setItem(LS_THEME,th);
 }
-function toggleTheme(){ applyTheme(document.getElementById("themeToggle").checked ? "dark":"light"); }
+function toggleTheme(){ applyTheme(document.getElementById("themeToggle").checked?"dark":"light"); }
 
 /* =====================================================
    HELPERS
    ===================================================== */
-const esc = s => String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const inr = n => n>0 ? "₹ "+Number(n).toLocaleString("en-IN") : "—";
-const fmtDate = d => { if(!d) return "—"; const dt=new Date(d+"T00:00:00"); return isNaN(dt)?d:dt.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}); };
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const inr=n=>n>0?"₹ "+Number(n).toLocaleString("en-IN"):"—";
+const fmtDate=d=>{ if(!d) return "—"; const dt=new Date(d+"T00:00:00"); return isNaN(dt)?d:dt.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}); };
 function toast(msg){ const el=document.getElementById("toast"); el.textContent=msg; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"),2200); }
 function segTasks(name){ return state.tasks.filter(x=>x.segment===name); }
+function prio(x){ const p=Number(x.priority); return (p>=1&&p<=5)?p:3; }
 
 /* =====================================================
    RENDER
@@ -409,10 +508,10 @@ function render(){
 }
 function renderTabs(){
   const el=document.getElementById("tabs");
-  let html = `<button class="tab ${currentTab==="Overview"?"active":""}" onclick="switchTab('Overview')">📊 Overview</button>`;
+  let html=`<button class="tab ${currentTab==="Overview"?"active":""}" onclick="switchTab('Overview')">📊 Overview</button>`;
   for(const s of state.segments){
     const n=segTasks(s.name).length;
-    html += `<button class="tab ${currentTab===s.name?"active":""}" onclick="switchTab('${esc(s.name).replace(/'/g,"\\'")}')">${esc(s.name)}<span class="cnt">${n}</span></button>`;
+    html+=`<button class="tab ${currentTab===s.name?"active":""}" onclick="switchTab('${esc(s.name).replace(/'/g,"\\'")}')">${esc(s.name)}<span class="cnt">${n}</span></button>`;
   }
   el.innerHTML=html;
 }
@@ -422,16 +521,43 @@ function renderOverview(){
   const total=state.tasks.length;
   const done=state.tasks.filter(x=>x.stage==="Completed").length;
   const prog=state.tasks.filter(x=>x.stage==="InProgress"||x.stage==="Ordered").length;
+  const pending=total-done-prog;
   const cost=state.tasks.reduce((a,x)=>a+(Number(x.cost)||0),0);
   const spent=state.tasks.filter(x=>x.stage==="Completed").reduce((a,x)=>a+(Number(x.cost)||0),0);
+  const pctDone=total?Math.round(done/total*100):0;
+  const pctProg=total?Math.round(prog/total*100):0;
+
   let html=`<div class="kpis">
     <div class="kpi"><div class="num">${total}</div><div class="lbl">Total tasks</div></div>
     <div class="kpi"><div class="num" style="color:var(--green)">${done}</div><div class="lbl">Completed</div></div>
     <div class="kpi"><div class="num" style="color:var(--amber)">${prog}</div><div class="lbl">In progress / ordered</div></div>
-    <div class="kpi"><div class="num" style="color:var(--accent)">${total-done-prog}</div><div class="lbl">Pending</div></div>
+    <div class="kpi"><div class="num" style="color:var(--accent)">${pending}</div><div class="lbl">Pending</div></div>
     <div class="kpi"><div class="num">${inr(cost)}</div><div class="lbl">Total est. cost</div></div>
     <div class="kpi"><div class="num" style="color:var(--green)">${inr(spent)}</div><div class="lbl">Cost of completed</div></div>
-  </div><div class="seg-grid">`;
+  </div>`;
+
+  // ---- progress donut + calendar row ----
+  const gEnd=pctDone, aEnd=pctDone+pctProg;
+  const donutStyle=`background:conic-gradient(var(--green) 0 ${gEnd}%, var(--amber) ${gEnd}% ${aEnd}%, var(--grey-soft) ${aEnd}% 100%)`;
+  html+=`<div class="ov-row">
+    <div class="panel">
+      <h3>Overall progress</h3>
+      <div class="donut-wrap">
+        <div class="donut" style="${donutStyle}">
+          <div class="ctr"><div class="big">${pctDone}%</div><div class="cap">Complete</div></div>
+        </div>
+        <div class="legend">
+          <div><span class="dot" style="background:var(--green)"></span>Completed — ${done} (${pctDone}%)</div>
+          <div><span class="dot" style="background:var(--amber)"></span>In progress / ordered — ${prog} (${pctProg}%)</div>
+          <div><span class="dot" style="background:var(--grey-soft)"></span>Pending — ${pending} (${total?Math.round(pending/total*100):0}%)</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" id="calPanel">${calendarHTML()}</div>
+  </div>`;
+
+  // ---- segment cards ----
+  html+=`<div class="seg-grid">`;
   for(const s of state.segments){
     const ts=segTasks(s.name);
     const d=ts.filter(x=>x.stage==="Completed").length;
@@ -447,6 +573,112 @@ function renderOverview(){
   document.getElementById("content").innerHTML=html;
 }
 
+/* =====================================================
+   CALENDAR WIDGET
+   ===================================================== */
+function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function tasksOnDate(iso){
+  const due=state.tasks.filter(x=>x.due===iso);
+  const prop=state.tasks.filter(x=>x.proposed===iso && x.due!==iso);
+  return {due,prop};
+}
+function calendarHTML(){
+  const now=new Date();
+  if(calYear===undefined){ calYear=now.getFullYear(); calMonth=now.getMonth(); }
+  const first=new Date(calYear,calMonth,1);
+  const startDow=first.getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const todayIso=ymd(now);
+  const monthName=first.toLocaleDateString("en-IN",{month:"long",year:"numeric"});
+
+  let html=`<div class="cal-head">
+    <button onclick="calMove(-1)" title="Previous month">‹</button>
+    <div class="cal-title">${monthName}</div>
+    <button onclick="calMove(1)" title="Next month">›</button>
+  </div>
+  <div class="cal-grid">`;
+  for(const d of ["Su","Mo","Tu","We","Th","Fr","Sa"]) html+=`<div class="cal-dow">${d}</div>`;
+  for(let i=0;i<startDow;i++) html+=`<div class="cal-cell empty"></div>`;
+  for(let day=1;day<=days;day++){
+    const iso=calYear+"-"+String(calMonth+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+    const {due,prop}=tasksOnDate(iso);
+    const has=due.length||prop.length;
+    let dots="";
+    if(due.length) dots+=`<span class="cal-dot due" title="${due.length} deadline(s)"></span>`;
+    if(prop.length) dots+=`<span class="cal-dot prop" title="${prop.length} proposed"></span>`;
+    const cls=["cal-cell"];
+    if(iso===todayIso) cls.push("today");
+    if(has) cls.push("has");
+    if(iso===calSelected) cls.push("sel");
+    const click=has?`onclick="calPick('${iso}')"`:"";
+    html+=`<div class="${cls.join(" ")}" ${click}><div class="dnum">${day}</div><div class="cal-dots">${dots}</div></div>`;
+  }
+  html+=`</div>
+  <div class="cal-legend">
+    <span><span class="cal-dot due"></span> Due date (deadline)</span>
+    <span><span class="cal-dot prop"></span> Proposed date</span>
+  </div>`;
+
+  if(calSelected){
+    const {due,prop}=tasksOnDate(calSelected);
+    const all=[...due.map(x=>({x,kind:"due"})),...prop.map(x=>({x,kind:"prop"}))];
+    html+=`<div class="cal-daylist"><b>${fmtDate(calSelected)}</b>`;
+    for(const it of all){
+      const col=it.kind==="due"?"var(--red)":"var(--blue)";
+      html+=`<div class="di"><span class="cal-dot" style="background:${col}"></span>
+        <span><b>${esc(it.x.task)}</b> — <span style="color:var(--muted)">${esc(it.x.segment)}</span></span></div>`;
+    }
+    html+=`</div>`;
+  } else {
+    // upcoming deadlines list
+    const today=ymd(new Date());
+    const up=state.tasks.filter(x=>x.due && x.due>=today && x.stage!=="Completed")
+      .sort((a,b)=>a.due<b.due?-1:1).slice(0,6);
+    if(up.length){
+      html+=`<div class="upcoming"><b style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Next deadlines</b>`;
+      for(const x of up) html+=`<div class="ui"><span>${esc(x.task)} · <span style="color:var(--muted)">${esc(x.segment)}</span></span><span class="ud">${fmtDate(x.due)}</span></div>`;
+      html+=`</div>`;
+    } else {
+      html+=`<div class="upcoming" style="color:var(--muted)">No upcoming deadlines yet. Add a <b>Due date</b> to a task and it appears here and on the calendar.</div>`;
+    }
+  }
+  return html;
+}
+function calMove(delta){
+  calMonth+=delta;
+  if(calMonth<0){ calMonth=11; calYear--; }
+  else if(calMonth>11){ calMonth=0; calYear++; }
+  calSelected=null;
+  document.getElementById("calPanel").innerHTML=calendarHTML();
+}
+function calPick(iso){
+  calSelected=(calSelected===iso)?null:iso;
+  document.getElementById("calPanel").innerHTML=calendarHTML();
+}
+
+/* =====================================================
+   SEGMENT VIEW  (with priority column + sorting)
+   ===================================================== */
+function setSort(key){
+  if(sortKey===key) sortDir*=-1; else { sortKey=key; sortDir=1; }
+  renderSegment(currentTab);
+}
+function sortTasks(arr){
+  const dir=sortDir;
+  return arr.slice().sort((a,b)=>{
+    let av,bv;
+    if(sortKey==="priority"){ av=prio(a); bv=prio(b); }
+    else if(sortKey==="cost"){ av=Number(a.cost)||0; bv=Number(b.cost)||0; }
+    else if(sortKey==="due"){ av=a.due||"9999"; bv=b.due||"9999"; }
+    else if(sortKey==="stage"){ av=STAGES.indexOf(a.stage); bv=STAGES.indexOf(b.stage); }
+    else { av=(a[sortKey]||"").toLowerCase(); bv=(b[sortKey]||"").toLowerCase(); }
+    if(av<bv) return -1*dir;
+    if(av>bv) return 1*dir;
+    return (a.task||"").localeCompare(b.task||"");
+  });
+}
+function arrow(key){ return sortKey===key?`<span class="arrow">${sortDir>0?"▲":"▼"}</span>`:""; }
+
 function renderSegment(name){
   const seg=state.segments.find(s=>s.name===name);
   let ts=segTasks(name);
@@ -455,21 +687,33 @@ function renderSegment(name){
     const q=searchQ.toLowerCase();
     ts=ts.filter(x=>(x.task+" "+x.owner+" "+x.notes+" "+x.stage).toLowerCase().includes(q));
   }
+  ts=sortTasks(ts);
   const admin=isAdmin();
+  const sn=esc(name).replace(/'/g,"\\'");
   let html=`<div class="seg-head">
     <h2>${esc(name)}</h2>
     <span class="totals">${segTasks(name).length} tasks · total cost ${inr(totalCost)}</span>
     <div class="spacer"></div>
-    <input class="searchbox" placeholder="🔍 Search tasks…" value="${esc(searchQ)}" oninput="searchQ=this.value;renderSegment('${esc(name).replace(/'/g,"\\'")}')">
-    ${admin?`<button class="addbtn" onclick="openAddTask('${esc(name).replace(/'/g,"\\'")}')">＋ Add Task</button>`:""}
+    <input class="searchbox" placeholder="🔍 Search tasks…" value="${esc(searchQ)}" oninput="searchQ=this.value;renderSegment('${sn}')">
+    ${admin?`<button class="addbtn" onclick="openAddTask('${sn}')">＋ Add Task</button>`:""}
   </div>`;
   if(seg && seg.note) html+=`<div class="seg-note">ℹ️ ${esc(seg.note)}</div>`;
   html+=`<div class="tablewrap"><table><thead><tr>
-    <th>Task</th><th>Owner</th><th>Stage</th><th>Proposed</th><th>Due date</th><th style="text-align:right">Cost (₹)</th><th>Notes</th>${admin?"<th></th>":""}
+    <th class="sortable" onclick="setSort('priority')" style="text-align:center">Prio ${arrow("priority")}</th>
+    <th class="sortable" onclick="setSort('task')">Task ${arrow("task")}</th>
+    <th class="sortable" onclick="setSort('owner')">Owner ${arrow("owner")}</th>
+    <th class="sortable" onclick="setSort('stage')">Stage ${arrow("stage")}</th>
+    <th>Proposed</th>
+    <th class="sortable" onclick="setSort('due')">Due date ${arrow("due")}</th>
+    <th class="sortable" style="text-align:right" onclick="setSort('cost')">Cost (₹) ${arrow("cost")}</th>
+    <th>Notes</th>${admin?"<th></th>":""}
   </tr></thead><tbody>`;
-  if(!ts.length) html+=`<tr><td colspan="${admin?8:7}" style="text-align:center;color:var(--muted);padding:26px">No tasks${searchQ?" match your search":""}.</td></tr>`;
+  const cols=admin?9:8;
+  if(!ts.length) html+=`<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);padding:26px">No tasks${searchQ?" match your search":""}.</td></tr>`;
   for(const x of ts){
+    const p=prio(x);
     html+=`<tr>
+      <td class="prio"><span class="pill pr${p}" title="${PRIORITY_LABELS[p]}">${p}</span></td>
       <td class="taskname">${esc(x.task)}</td>
       <td>${esc(x.owner||"TBA")}</td>
       <td><span class="badge st-${x.stage}">${STAGE_LABELS[x.stage]||esc(x.stage)}</span></td>
@@ -480,7 +724,7 @@ function renderSegment(name){
       ${admin?`<td style="white-space:nowrap"><button class="rowbtn" title="Edit" onclick="openEditTask('${x.id}')">✏️</button></td>`:""}
     </tr>`;
   }
-  html+=`</tbody><tfoot><tr><td colspan="5">Segment total</td><td class="cost">${inr(totalCost)}</td><td></td>${admin?"<td></td>":""}</tr></tfoot></table></div>`;
+  html+=`</tbody><tfoot><tr><td colspan="6">Segment total</td><td class="cost">${inr(totalCost)}</td><td></td>${admin?"<td></td>":""}</tr></tfoot></table></div>`;
   document.getElementById("content").innerHTML=html;
 }
 
@@ -488,8 +732,9 @@ function renderSegment(name){
    TASK CRUD (admin)
    ===================================================== */
 function fillModalSelects(){
-  document.getElementById("f_segment").innerHTML = state.segments.map(s=>`<option>${esc(s.name)}</option>`).join("");
-  document.getElementById("f_stage").innerHTML = STAGES.map(s=>`<option value="${s}">${STAGE_LABELS[s]}</option>`).join("");
+  document.getElementById("f_segment").innerHTML=state.segments.map(s=>`<option>${esc(s.name)}</option>`).join("");
+  document.getElementById("f_stage").innerHTML=STAGES.map(s=>`<option value="${s}">${STAGE_LABELS[s]}</option>`).join("");
+  document.getElementById("f_priority").innerHTML=[1,2,3,4,5].map(p=>`<option value="${p}">${PRIORITY_LABELS[p]}</option>`).join("");
 }
 function openAddTask(segName){
   if(!isAdmin()) return;
@@ -498,7 +743,7 @@ function openAddTask(segName){
   document.getElementById("deleteTaskBtn").style.display="none";
   f_task.value=""; f_owner.value="TBA"; f_notes.value=""; f_cost.value="";
   f_proposed.value=new Date().toISOString().slice(0,10); f_due.value="";
-  f_segment.value=segName; f_stage.value="Proposed";
+  f_segment.value=segName; f_stage.value="Proposed"; f_priority.value="3";
   document.getElementById("taskOverlay").classList.add("show");
 }
 function openEditTask(id){
@@ -508,7 +753,7 @@ function openEditTask(id){
   document.getElementById("taskModalTitle").textContent="Edit Task";
   document.getElementById("deleteTaskBtn").style.display="";
   f_task.value=x.task; f_segment.value=x.segment; f_owner.value=x.owner;
-  f_stage.value=x.stage; f_proposed.value=x.proposed; f_due.value=x.due;
+  f_stage.value=x.stage; f_priority.value=String(prio(x)); f_proposed.value=x.proposed; f_due.value=x.due;
   f_cost.value=x.cost||""; f_notes.value=x.notes;
   document.getElementById("taskOverlay").classList.add("show");
 }
@@ -516,77 +761,67 @@ function saveTask(){
   const name=f_task.value.trim();
   if(!name){ toast("Task name is required"); return; }
   const data={task:name, segment:f_segment.value, owner:f_owner.value.trim()||"TBA", stage:f_stage.value,
-    proposed:f_proposed.value, due:f_due.value, cost:Number(f_cost.value)||0, notes:f_notes.value.trim()};
-  if(editingId){ Object.assign(state.tasks.find(t=>t.id===editingId), data); toast("Task updated"); }
-  else{ state.tasks.push(Object.assign({id:"u"+Date.now().toString(36)}, data)); toast("Task added"); }
-  saveState(); closeModal("taskOverlay");
-  currentTab = data.segment; render();
+    priority:Number(f_priority.value)||3, proposed:f_proposed.value, due:f_due.value,
+    cost:Number(f_cost.value)||0, notes:f_notes.value.trim()};
+  let saved;
+  if(editingId){ saved=Object.assign(state.tasks.find(t=>t.id===editingId), data); }
+  else{ saved=Object.assign({id:"u"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)}, data); state.tasks.push(saved); }
+  currentTab=data.segment;
+  closeModal("taskOverlay");
+  toast(editingId?"Task updated":"Task added");
+  persist({action:"upsertTask", task:saved}, null);
 }
-function deleteTask(){
+function deleteTaskAction(){
   if(!editingId) return;
   if(!confirm("Delete this task?")) return;
-  state.tasks = state.tasks.filter(t=>t.id!==editingId);
-  saveState(); closeModal("taskOverlay"); toast("Task deleted"); render();
+  const id=editingId;
+  state.tasks=state.tasks.filter(t=>t.id!==id);
+  closeModal("taskOverlay"); toast("Task deleted");
+  persist({action:"deleteTask", id:id}, null);
 }
 function closeModal(id){ document.getElementById(id).classList.remove("show"); }
 
 /* =====================================================
    ADMIN PANEL
    ===================================================== */
-function openAdminPanel(){
-  if(!isAdmin()) return;
-  renderAdminList();
-  document.getElementById("adminOverlay").classList.add("show");
-}
+function openAdminPanel(){ if(!isAdmin()) return; renderAdminList(); document.getElementById("adminOverlay").classList.add("show"); }
 function renderAdminList(){
   const admins=getAdmins();
-  document.getElementById("adminList").innerHTML = admins.map(a=>
+  document.getElementById("adminList").innerHTML=admins.map(a=>
     `<li><span>${esc(a)}</span>${admins.length>1?`<button class="rowbtn" onclick="removeAdmin('${esc(a)}')">🗑️</button>`:""}</li>`).join("");
 }
 function addAdmin(){
   const em=document.getElementById("newAdminEmail").value.trim().toLowerCase();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ toast("Invalid email"); return; }
-  const a=getAdmins();
+  const a=getAdmins().slice();
   if(!a.includes(em)) a.push(em);
-  saveAdmins(a); document.getElementById("newAdminEmail").value=""; renderAdminList(); toast("Admin added");
+  state.admins=a; document.getElementById("newAdminEmail").value=""; renderAdminList(); toast("Admin added");
+  persist({action:"setAdmins", admins:a}, null);
 }
 function removeAdmin(em){
   let a=getAdmins().filter(x=>x!==em);
   if(!a.length){ toast("At least one admin required"); return; }
-  saveAdmins(a); renderAdminList(); enterApp(); toast("Admin removed");
+  state.admins=a; renderAdminList(); toast("Admin removed");
+  persist({action:"setAdmins", admins:a}, ()=>{
+    const rb=document.getElementById("roleBadge");
+    rb.textContent=isAdmin()?"ADMIN":"VIEWER";
+    rb.className="role-badge "+(isAdmin()?"role-admin":"role-viewer");
+    document.getElementById("adminPanelBtn").style.display=isAdmin()?"":"none";
+  });
 }
 
 /* =====================================================
-   EXPORT / IMPORT
+   CSV EXPORT
    ===================================================== */
 function download(filename, text, type){
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([text],{type}));
   a.download=filename; a.click(); URL.revokeObjectURL(a.href);
 }
-function exportJSON(){
-  download("jambhe-dashboard-backup-"+new Date().toISOString().slice(0,10)+".json",
-    JSON.stringify({data:state, admins:getAdmins()}, null, 2), "application/json");
-  toast("Backup downloaded");
-}
-function importJSON(ev){
-  const file=ev.target.files[0]; if(!file) return;
-  const r=new FileReader();
-  r.onload=()=>{ try{
-      const obj=JSON.parse(r.result);
-      if(obj.data && obj.data.tasks){ state=obj.data; saveState(); }
-      else if(obj.tasks){ state=obj; saveState(); }
-      else throw 0;
-      if(Array.isArray(obj.admins) && obj.admins.length) saveAdmins(obj.admins);
-      enterApp(); toast("Data restored");
-    }catch(e){ toast("Invalid backup file"); } };
-  r.readAsText(file);
-  ev.target.value="";
-}
 function exportCSV(){
-  const rows=[["Segment","Task","Owner","Stage","Proposed Date","Due Date","Cost (INR)","Notes"]];
-  for(const s of state.segments) for(const x of segTasks(s.name))
-    rows.push([x.segment,x.task,x.owner,STAGE_LABELS[x.stage]||x.stage,x.proposed,x.due,x.cost||0,x.notes]);
+  const rows=[["Segment","Task","Priority","Owner","Stage","Proposed Date","Due Date","Cost (INR)","Notes"]];
+  const ordered=state.tasks.slice().sort((a,b)=> prio(a)-prio(b) || a.segment.localeCompare(b.segment));
+  for(const x of ordered) rows.push([x.segment,x.task,prio(x),x.owner,STAGE_LABELS[x.stage]||x.stage,x.proposed,x.due,x.cost||0,x.notes]);
   const csv=rows.map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
   download("jambhe-centre-tasks.csv","﻿"+csv,"text/csv");
   toast("CSV downloaded");
@@ -595,10 +830,20 @@ function exportCSV(){
 /* =====================================================
    INIT
    ===================================================== */
-state = loadState();
-applyTheme(localStorage.getItem(LS_THEME) || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark":"light"));
-const savedUser = localStorage.getItem(LS_USER);
-if(savedUser){ currentUser=savedUser; enterApp(); }
+(async function boot(){
+  applyTheme(localStorage.getItem(LS_THEME) || (matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
+  const ls=document.getElementById("loginStatus");
+  if(API_LIVE){
+    ls.textContent="Connecting to live sheet…";
+    try{ await refreshFromServer(); ls.textContent="🟢 Connected to live Google Sheet."; }
+    catch(e){ state=loadCache(); ls.textContent="⚠️ Couldn't reach the sheet — showing last saved data."; }
+  }else{
+    state=loadCache();
+    ls.textContent="Demo mode — add your web-app URL to go live.";
+  }
+  const savedUser=localStorage.getItem(LS_USER);
+  if(savedUser){ currentUser=savedUser; enterApp(); }
+})();
 </script>
 </body>
 </html>
