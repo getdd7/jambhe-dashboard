@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jambhe Teenagers Vipassana Centre — Readiness Dashboard</title>
+<title>JTC — Jambhe Teenagers Centre — Readiness Dashboard</title>
 <style>
   :root{
     --sky:#ffffff; --bg:#e7f0f7; --surface:#ffffff; --surface2:#f1f7fc; --text:#1d3444; --muted:#647784;
@@ -162,10 +162,8 @@
   .dt-block{margin-bottom:14px; font-family:sans-serif;}
   .dt-block .log-entry{margin-top:6px;}
   /* dhamma chakra + home button */
-  .chakra{width:30px; height:30px; color:#1a3f8f; display:block;}
-  [data-theme="dark"] .chakra{color:#7aaede;}
-  .login-chakra{width:54px; height:54px; color:#1a3f8f; margin:0 auto 10px; display:block;}
-  [data-theme="dark"] .login-chakra{color:#7aaede;}
+  .chakra{width:30px; height:30px; color:var(--gold); display:block;}
+  .login-chakra{width:54px; height:54px; color:var(--gold); margin:0 auto 10px; display:block; filter:drop-shadow(0 1px 2px rgba(150,110,20,.35));}
   .homebtn{background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center;}
   .homebtn:hover .chakra{filter:brightness(1.15);}
   /* clickable KPI */
@@ -361,8 +359,8 @@
   <div class="login-scene"><div class="ground"></div><svg class="lp" viewBox="0 0 480 320" aria-hidden="true"><use href="#pagodaScene"/></svg></div>
   <div class="login-card">
     <svg class="login-chakra" viewBox="0 0 100 100" aria-hidden="true"><use href="#chakra"/></svg>
-    <h1>Jambhe Teenagers Vipassana Centre</h1>
-    <p>Operational Readiness Dashboard</p>
+    <h1>Jambhe Teenagers Centre</h1>
+    <p><b style="letter-spacing:1px">JTC</b> · Operational Readiness Dashboard</p>
     <input type="email" id="loginEmail" placeholder="Enter your email address" onkeydown="if(event.key==='Enter')doLogin()">
     <div class="login-err" id="loginErr"></div>
     <button onclick="doLogin()">Sign in</button>
@@ -377,7 +375,7 @@
   <div class="title">
     <button class="homebtn" onclick="switchTab('Overview')" title="Home"><svg class="chakra" viewBox="0 0 100 100" aria-hidden="true"><use href="#chakra"/></svg></button>
     <div>
-      <h1>Jambhe Teenagers Vipassana Centre</h1>
+      <h1>Jambhe Teenagers Centre</h1>
       <div class="sub"><span class="livedot" id="liveDot"></span><span id="liveText">Live · synced to Google Sheet</span></div>
     </div>
   </div>
