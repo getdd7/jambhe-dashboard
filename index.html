@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JTC Jambhe Centre — Readiness Dashboard</title>
+<title>Jambhe Teenagers Vipassana Center — Readiness Dashboard</title>
 <style>
   :root{
     --sky:#ffffff; --bg:#e7f0f7; --surface:#ffffff; --surface2:#f1f7fc; --text:#1d3444; --muted:#647784;
@@ -254,16 +254,68 @@
       <ellipse cx="240" cy="214" rx="40" ry="2.4"/>
     </g>
   </symbol>
+  <symbol id="pagodaScene" viewBox="0 0 480 320">
+    <use href="#pagodaArt"/>
+    <g stroke-linecap="round">
+      <!-- running child (red) -->
+      <g stroke="#c0392b" stroke-width="2.4" fill="none">
+        <line x1="52" y1="298" x2="52" y2="307"/><line x1="52" y1="300" x2="47" y2="296"/>
+        <line x1="52" y1="300" x2="57" y2="304"/><line x1="52" y1="307" x2="48" y2="314"/>
+        <line x1="52" y1="307" x2="57" y2="313"/>
+      </g><circle cx="52" cy="294" r="3" fill="#e8b98a"/>
+      <!-- jumping child (teal) -->
+      <g stroke="#2f8f6d" stroke-width="2.4" fill="none">
+        <line x1="82" y1="294" x2="82" y2="303"/><line x1="82" y1="296" x2="77" y2="291"/>
+        <line x1="82" y1="296" x2="87" y2="291"/><line x1="82" y1="303" x2="78" y2="310"/>
+        <line x1="82" y1="303" x2="86" y2="310"/>
+      </g><circle cx="82" cy="290" r="3" fill="#e8b98a"/>
+      <!-- meditating child -->
+      <path d="M141 314 Q150 306 159 314 Z" fill="#f3efe2"/>
+      <path d="M146.5 313 L153.5 313 L153 304 Q150 301 147 304 Z" fill="#f3efe2"/>
+      <circle cx="150" cy="300" r="3.2" fill="#e8b98a"/>
+      <!-- studying child (blue) with book -->
+      <path d="M178 314 Q186 308 194 314 Z" fill="#2f6db3"/>
+      <path d="M183 313 L190 313 L192 306 L186 305 Z" fill="#2f6db3"/>
+      <circle cx="190" cy="302.5" r="2.9" fill="#e8b98a"/>
+      <rect x="188" y="309" width="9" height="5" rx="1" fill="#faf7ee"/>
+      <!-- meditating child (centre) -->
+      <path d="M231 314 Q240 306 249 314 Z" fill="#f3efe2"/>
+      <path d="M236.5 313 L243.5 313 L243 304 Q240 301 237 304 Z" fill="#f3efe2"/>
+      <circle cx="240" cy="300" r="3.2" fill="#e8b98a"/>
+      <!-- studying child (saffron) with book -->
+      <path d="M292 314 Q300 308 308 314 Z" fill="#d9552e"/>
+      <path d="M297 313 L304 313 L306 306 L300 305 Z" fill="#d9552e"/>
+      <circle cx="304" cy="302.5" r="2.9" fill="#e8b98a"/>
+      <rect x="302" y="309" width="9" height="5" rx="1" fill="#faf7ee"/>
+      <!-- meditating child -->
+      <path d="M323 314 Q332 306 341 314 Z" fill="#f3efe2"/>
+      <path d="M328.5 313 L335.5 313 L335 304 Q332 301 329 304 Z" fill="#f3efe2"/>
+      <circle cx="332" cy="300" r="3.2" fill="#e8b98a"/>
+      <!-- child with ball (blue) -->
+      <g stroke="#2f6db3" stroke-width="2.4" fill="none">
+        <line x1="406" y1="298" x2="406" y2="307"/><line x1="406" y1="300" x2="401" y2="303"/>
+        <line x1="406" y1="300" x2="411" y2="298"/><line x1="406" y1="307" x2="402" y2="314"/>
+        <line x1="406" y1="307" x2="410" y2="314"/>
+      </g><circle cx="406" cy="294" r="3" fill="#e8b98a"/>
+      <circle cx="416" cy="311" r="3" fill="#e0a92e"/>
+      <!-- running child (yellow) -->
+      <g stroke="#e0a92e" stroke-width="2.4" fill="none">
+        <line x1="440" y1="298" x2="440" y2="307"/><line x1="440" y1="300" x2="445" y2="296"/>
+        <line x1="440" y1="300" x2="435" y2="304"/><line x1="440" y1="307" x2="444" y2="314"/>
+        <line x1="440" y1="307" x2="435" y2="313"/>
+      </g><circle cx="440" cy="294" r="3" fill="#e8b98a"/>
+    </g>
+  </symbol>
 </defs></svg>
 
-<div class="pagoda-bg" aria-hidden="true"><svg viewBox="0 0 480 320"><use href="#pagodaArt"/></svg></div>
+<div class="pagoda-bg" aria-hidden="true"><svg viewBox="0 0 480 320"><use href="#pagodaScene"/></svg></div>
 
 <!-- LOGIN -->
 <div id="loginScreen">
-  <div class="login-scene"><div class="ground"></div><svg class="lp" viewBox="0 0 480 320" aria-hidden="true"><use href="#pagodaArt"/></svg></div>
+  <div class="login-scene"><div class="ground"></div><svg class="lp" viewBox="0 0 480 320" aria-hidden="true"><use href="#pagodaScene"/></svg></div>
   <div class="login-card">
     <div class="wheel">☸️</div>
-    <h1>JTC Jambhe Centre</h1>
+    <h1>Jambhe Teenagers Vipassana Center</h1>
     <p>Operational Readiness Dashboard</p>
     <input type="email" id="loginEmail" placeholder="Enter your email address" onkeydown="if(event.key==='Enter')doLogin()">
     <div class="login-err" id="loginErr"></div>
@@ -279,7 +331,7 @@
   <div class="title">
     <span class="wheel">☸️</span>
     <div>
-      <h1>Jambhe Centre Readiness</h1>
+      <h1>Jambhe Teenagers Vipassana Center</h1>
       <div class="sub"><span class="livedot" id="liveDot"></span><span id="liveText">Live · synced to Google Sheet</span></div>
     </div>
   </div>
