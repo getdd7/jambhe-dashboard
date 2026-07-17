@@ -6,24 +6,27 @@
 <title>JTC Jambhe Centre — Readiness Dashboard</title>
 <style>
   :root{
-    --bg:#f5f3ee; --surface:#ffffff; --surface2:#faf8f4; --text:#2b2620; --muted:#7a736a;
-    --border:#e5e0d6; --accent:#b3541e; --accent-soft:#f6e3d5; --gold:#c99a2e;
-    --green:#2e7d4f; --green-soft:#ddefe4; --blue:#2f6db3; --blue-soft:#dfeaf7;
-    --amber:#a06a00; --amber-soft:#f7ecd2; --grey-soft:#eceae4; --red:#b3402e; --red-soft:#f6ddd8;
-    --shadow:0 2px 12px rgba(60,50,30,.08);
+    --sky:#ffffff; --bg:#e7f0f7; --surface:#ffffff; --surface2:#f1f7fc; --text:#1d3444; --muted:#647784;
+    --border:#d6e4ef; --accent:#1c6ea4; --accent-soft:#dcebf6; --gold:#c99a2e;
+    --green:#2e7d4f; --green-soft:#dcefe4; --blue:#2f6db3; --blue-soft:#dfeaf7;
+    --amber:#a06a00; --amber-soft:#f6ecd4; --grey-soft:#e6eef4; --red:#b3402e; --red-soft:#f6ddd8;
+    --shadow:0 2px 14px rgba(28,60,90,.10);
   }
   [data-theme="dark"]{
-    --bg:#171512; --surface:#211e1a; --surface2:#2a2620; --text:#ece7de; --muted:#a29a8d;
-    --border:#3a352c; --accent:#e08a4e; --accent-soft:#3d2a1c; --gold:#d9b054;
-    --green:#6fc493; --green-soft:#1e3328; --blue:#7aaede; --blue-soft:#1e2c3d;
-    --amber:#e0b45c; --amber-soft:#3a2f16; --grey-soft:#33302a; --red:#e0705c; --red-soft:#3d221d;
-    --shadow:0 2px 12px rgba(0,0,0,.4);
+    --sky:#12222e; --bg:#0e1a23; --surface:#16242f; --surface2:#1c2f3c; --text:#e6eef4; --muted:#93a6b3;
+    --border:#2a3f4d; --accent:#5aa6cf; --accent-soft:#173241; --gold:#d9b054;
+    --green:#6fc493; --green-soft:#173328; --blue:#7aaede; --blue-soft:#1b2c3d;
+    --amber:#e0b45c; --amber-soft:#33291a; --grey-soft:#243542; --red:#e0705c; --red-soft:#3a201c;
+    --shadow:0 2px 14px rgba(0,0,0,.45);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{font-family:Georgia,'Times New Roman',serif; background:var(--bg); color:var(--text); min-height:100vh; transition:background .3s,color .3s;}
+  body{font-family:Georgia,'Times New Roman',serif; background:linear-gradient(180deg,var(--sky),var(--bg) 55%) fixed; color:var(--text); min-height:100vh; transition:background .3s,color .3s;}
+  .pagoda-bg{position:fixed; left:50%; bottom:0; transform:translateX(-50%); width:min(820px,96vw); z-index:-1; pointer-events:none; opacity:.09; color:var(--accent); line-height:0;}
+  .pagoda-bg svg{width:100%; height:auto; display:block;}
+  [data-theme="dark"] .pagoda-bg{opacity:.18;}
   button, input, select, textarea{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; font-size:14px;}
 
-  #loginScreen{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); z-index:100;}
+  #loginScreen{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:transparent; z-index:100;}
   .login-card{background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); padding:44px 40px; width:min(420px,92vw); text-align:center;}
   .login-card .wheel{font-size:44px; margin-bottom:10px;}
   .login-card h1{font-size:22px; margin-bottom:4px;}
@@ -199,6 +202,32 @@
 </style>
 </head>
 <body>
+
+<!-- PAGODA BACKGROUND (original artwork) -->
+<div class="pagoda-bg" aria-hidden="true">
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor">
+  <path d="M40 288 H360 V296 H40 Z"/>
+  <path d="M70 288 L330 288 L306 266 L94 266 Z"/>
+  <path d="M108 266 L292 266 L274 248 L126 248 Z"/>
+  <path d="M140 248 L260 248 L248 232 L152 232 Z"/>
+  <path d="M152 232 C144 176 158 132 200 132 C242 132 256 176 248 232 Z"/>
+  <path d="M185 118 H215 V132 H185 Z"/>
+  <path d="M189 118 L211 118 L207 108 L193 108 Z"/>
+  <path d="M193 108 L207 108 L204 99 L196 99 Z"/>
+  <path d="M197 99 L203 99 L200 66 Z"/>
+  <ellipse cx="200" cy="86" rx="12" ry="2.4"/>
+  <ellipse cx="200" cy="78" rx="9" ry="2.2"/>
+  <ellipse cx="200" cy="71" rx="6" ry="2"/>
+  <circle cx="200" cy="60" r="4"/>
+  <circle cx="200" cy="52" r="2.2"/>
+  <path d="M88 266 C85 238 98 222 118 222 C138 222 151 238 148 266 Z"/>
+  <path d="M114 222 L122 222 L118 200 Z"/>
+  <circle cx="118" cy="198" r="3"/>
+  <path d="M252 266 C249 238 262 222 282 222 C302 222 315 238 312 266 Z"/>
+  <path d="M278 222 L286 222 L282 200 Z"/>
+  <circle cx="282" cy="198" r="3"/>
+</g></svg>
+</div>
 
 <!-- LOGIN -->
 <div id="loginScreen">
