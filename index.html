@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JTC — Jambhe Teenagers Centre — Readiness Dashboard</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --sky:#ffffff; --bg:#e7f0f7; --surface:#ffffff; --surface2:#f1f7fc; --text:#1d3444; --muted:#647784;
@@ -374,21 +375,15 @@
     <svg class="login-chakra" viewBox="0 0 100 100" aria-hidden="true"><use href="#chakra"/></svg>
     <h1>Jambhe Teenagers Centre</h1>
     <p><b style="letter-spacing:1px">JTC</b> · Operational Readiness Dashboard</p>
-    <input type="email" id="loginEmail" placeholder="Enter your email address" onkeydown="if(event.key==='Enter')doLogin()">
-    <div class="login-err" id="loginErr"></div>
-    <button onclick="doLogin()">Sign in</button>
-    <button type="button" class="login-link" onclick="showRequest()">Request access</button>
-    <div id="reqBox" style="display:none; margin-top:10px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <input id="reqFirst" placeholder="First name">
-        <input id="reqLast" placeholder="Last name">
-      </div>
-      <input id="reqPhone" placeholder="Phone number" onkeydown="if(event.key==='Enter')sendRequest()">
-      <div style="font-size:11px;color:var(--muted);text-align:left;margin:-6px 0 10px">Use the email box above as your sign-in email.</div>
-      <button type="button" onclick="sendRequest()">Send access request</button>
+    <div id="gbtn" style="display:flex;justify-content:center;min-height:44px;margin:10px 0 4px"></div>
+    <div class="login-err" id="loginErr" style="margin-top:6px"></div>
+    <div id="reqBox" style="display:none; margin-top:6px">
+      <div id="reqWho" style="font-size:12.5px;color:var(--muted);margin-bottom:10px"></div>
+      <input id="reqPhone" placeholder="Phone number (optional)" onkeydown="if(event.key==='Enter')sendRequest()">
+      <button type="button" onclick="sendRequest()">Request access</button>
       <div id="reqMsg" style="font-size:12px; color:var(--muted); margin-top:8px"></div>
     </div>
-    <div class="login-note">Access is by approval. The centre admin grants <b>Read-only</b>, <b>Read/Write</b> or <b>Admin</b> access. New here? Enter your email, then click <b>Request access</b>.</div>
+    <div class="login-note">Sign in with your Google account. Access is granted by the centre admin — <b>Read-only</b>, <b>Read/Write</b> or <b>Admin</b>. New here? Sign in, then click <b>Request access</b>.</div>
     <div class="login-status" id="loginStatus"></div>
   </div>
 </div>
@@ -523,6 +518,7 @@
    ===================================================== */
 const API_URL = "https://script.google.com/macros/s/AKfycbzZFg4ft97038oyEhekXMZDIW0IvVDJVd-sqcBNaLTbmRbV8IgXsjYm0hdGQAJzJOtEjg/exec";
 const API_LIVE = /^https:\/\/script\.google\.com\/.*\/exec/.test(API_URL);
+const GOOGLE_CLIENT_ID = "1026390778436-lafi91109j1hg48rq9eu5jgp70fakd2i.apps.googleusercontent.com";
 
 const DEFAULT_ADMINS = ["getdeepakdeshpande@gmail.com","jtccoreteam@gmail.com"];
 const SUPER_ADMIN = "jtccoreteam@gmail.com";
@@ -570,6 +566,7 @@ const SEED = {
 const LS_DATA="jtc_dashboard_data", LS_THEME="jtc_theme", LS_USER="jtc_user";
 let state={segments:[],tasks:[],admins:[],logs:[],people:{},files:[],users:[],superAdmin:SUPER_ADMIN};
 let currentTab="Overview", currentUser=null, editingId=null, searchQ="", currentLogTask=null, currentFileTask=null, currentDetailTask=null;
+let currentCredential=null, gProfile=null;
 let sortKey="priority", sortDir=1;
 let calYear, calMonth, calSelected=null;
 
@@ -670,27 +667,55 @@ function doLogin(){
   else { err.style.color="var(--muted)"; err.textContent="This email doesn't have access yet — request it below."; showRequest(); }
 }
 function logout(){
-  localStorage.removeItem(LS_USER); currentUser=null;
+  localStorage.removeItem(LS_USER); currentUser=null; currentCredential=null; gProfile=null;
+  try{ google.accounts.id.disableAutoSelect(); }catch(e){}
   document.getElementById("app").style.display="none";
   document.getElementById("loginScreen").style.display="flex";
-  document.getElementById("loginEmail").value="";
+  document.getElementById("reqBox").style.display="none";
+  const err=document.getElementById("loginErr"); if(err) err.textContent="";
+  initGoogle();
+}
+/* ---- Google Sign-In ---- */
+function parseJwt(t){ try{ const b=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'); return JSON.parse(decodeURIComponent(escape(atob(b)))); }catch(e){ return {}; } }
+function initGoogle(){
+  if(!(window.google && google.accounts && google.accounts.id)){ return setTimeout(initGoogle, 300); }
+  google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID, callback:onGoogleCredential, auto_select:true, cancel_on_tap_outside:false});
+  const el=document.getElementById("gbtn");
+  if(el){ el.innerHTML=""; google.accounts.id.renderButton(el, {theme:"filled_blue", size:"large", text:"signin_with", shape:"pill", width:260}); }
+  try{ google.accounts.id.prompt(); }catch(e){}
+}
+function onGoogleCredential(resp){
+  const p=parseJwt(resp.credential);
+  const err=document.getElementById("loginErr");
+  if(!p.email){ err.style.color="var(--red)"; err.textContent="Google sign-in failed — please try again."; return; }
+  currentCredential=resp.credential; gProfile=p;
+  const em=String(p.email).toLowerCase();
+  const st=accessStatus(em);
+  const box=document.getElementById("reqBox");
+  if(st==="super"||st==="approved"){ err.textContent=""; box.style.display="none"; currentUser=em; localStorage.setItem(LS_USER,em); enterApp(); return; }
+  currentUser=null; box.style.display="none";
+  if(st==="pending"){ err.style.color="var(--amber)"; err.textContent="Your access request is pending approval."; }
+  else if(st==="rejected"){ err.style.color="var(--red)"; err.textContent="Access was declined. Please contact "+(state.superAdmin||SUPER_ADMIN)+"."; }
+  else {
+    err.style.color="var(--muted)"; err.textContent="Signed in as "+em+" — you don't have access yet.";
+    document.getElementById("reqWho").textContent="Request access for "+(p.name?p.name+" · ":"")+em;
+    box.style.display="block";
+  }
 }
 function showRequest(){
   document.getElementById("reqBox").style.display="block";
   setTimeout(()=>{ const n=document.getElementById("reqName"); if(n) n.focus(); },30);
 }
 function sendRequest(){
-  const em=document.getElementById("loginEmail").value.trim().toLowerCase();
-  const fn=document.getElementById("reqFirst").value.trim();
-  const ln=document.getElementById("reqLast").value.trim();
+  const p=gProfile||{};
+  const em=String(p.email||"").toLowerCase();
   const ph=document.getElementById("reqPhone").value.trim();
   const msg=document.getElementById("reqMsg");
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ msg.style.color="var(--red)"; msg.textContent="Enter your email in the box above first."; return; }
-  if(!fn||!ln){ msg.style.color="var(--red)"; msg.textContent="Please enter your first and last name."; return; }
+  if(!em){ msg.style.color="var(--red)"; msg.textContent="Please sign in with Google first."; return; }
   if(!API_LIVE){ msg.style.color="var(--red)"; msg.textContent="Not connected to the sheet."; return; }
   msg.style.color="var(--muted)"; msg.textContent="Sending…";
-  apiWrite({action:"requestAccess", email:em, name:(fn+" "+ln), phone:ph})
-    .then(()=>{ msg.style.color="var(--green)"; msg.textContent="✓ Request sent. You'll get an email once it's approved."; })
+  apiWrite({action:"requestAccess", email:em, name:(p.name||""), phone:ph, token:currentCredential})
+    .then(()=>{ msg.style.color="var(--green)"; msg.textContent="✓ Request sent. You'll be emailed once it's approved."; })
     .catch(()=>{ msg.style.color="var(--green)"; msg.textContent="✓ Request sent. You'll be emailed once approved."; });
 }
 function enterApp(){
@@ -1233,8 +1258,7 @@ function exportCSV(){
     try{ await refreshFromServer(); ls.textContent="🟢 Connected to live Google Sheet."; }
     catch(e){ state=loadCache(); ls.textContent="⚠️ Couldn't reach the sheet — showing last saved data."; }
   }else{ state=loadCache(); ls.textContent="Demo mode (not connected)."; }
-  const savedUser=localStorage.getItem(LS_USER);
-  if(savedUser){ currentUser=savedUser; if(hasAccess()) enterApp(); else { currentUser=null; localStorage.removeItem(LS_USER); } }
+  initGoogle();
 })();
 </script>
 </body>
