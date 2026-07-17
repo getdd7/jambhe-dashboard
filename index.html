@@ -163,6 +163,7 @@
   .status .cmt{color:var(--text);}
   .status .meta{color:var(--muted); font-size:11px; margin-top:2px;}
   .status .none{color:var(--muted);}
+  .statustag{background:var(--gold); color:#fff; border-radius:6px; padding:1px 7px; font-size:10.5px; font-weight:700; margin-right:5px; white-space:nowrap;}
   .chips{display:flex; flex-wrap:wrap; gap:4px;}
   .chip{background:var(--blue-soft); color:var(--blue); border-radius:999px; padding:2px 9px; font-size:11.5px; font-weight:600; white-space:nowrap;}
   .chip.tba{background:var(--grey-soft); color:var(--muted);}
@@ -378,7 +379,12 @@
     <button onclick="doLogin()">Sign in</button>
     <button type="button" class="login-link" onclick="showRequest()">Request access</button>
     <div id="reqBox" style="display:none; margin-top:10px">
-      <input id="reqName" placeholder="Your full name" onkeydown="if(event.key==='Enter')sendRequest()">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input id="reqFirst" placeholder="First name">
+        <input id="reqLast" placeholder="Last name">
+      </div>
+      <input id="reqPhone" placeholder="Phone number" onkeydown="if(event.key==='Enter')sendRequest()">
+      <div style="font-size:11px;color:var(--muted);text-align:left;margin:-6px 0 10px">Use the email box above as your sign-in email.</div>
       <button type="button" onclick="sendRequest()">Send access request</button>
       <div id="reqMsg" style="font-size:12px; color:var(--muted); margin-top:8px"></div>
     </div>
@@ -445,7 +451,7 @@
     <div class="log-sub" id="logSub"></div>
     <div class="log-list" id="logList"></div>
     <div class="addcmt" id="logAddRow">
-      <label>Add a comment / status update</label>
+      <label>Add a comment — start it with “Status:” to set the headline shown in the Status column</label>
       <textarea id="logComment" placeholder="Type an update…" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))addComment()"></textarea>
     </div>
     <div class="modal-actions">
@@ -675,13 +681,15 @@ function showRequest(){
 }
 function sendRequest(){
   const em=document.getElementById("loginEmail").value.trim().toLowerCase();
-  const nm=document.getElementById("reqName").value.trim();
+  const fn=document.getElementById("reqFirst").value.trim();
+  const ln=document.getElementById("reqLast").value.trim();
+  const ph=document.getElementById("reqPhone").value.trim();
   const msg=document.getElementById("reqMsg");
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ msg.style.color="var(--red)"; msg.textContent="Enter your email in the box above first."; return; }
-  if(!nm){ msg.style.color="var(--red)"; msg.textContent="Please enter your name."; return; }
+  if(!fn||!ln){ msg.style.color="var(--red)"; msg.textContent="Please enter your first and last name."; return; }
   if(!API_LIVE){ msg.style.color="var(--red)"; msg.textContent="Not connected to the sheet."; return; }
   msg.style.color="var(--muted)"; msg.textContent="Sending…";
-  apiWrite({action:"requestAccess", email:em, name:nm})
+  apiWrite({action:"requestAccess", email:em, name:(fn+" "+ln), phone:ph})
     .then(()=>{ msg.style.color="var(--green)"; msg.textContent="✓ Request sent. You'll get an email once it's approved."; })
     .catch(()=>{ msg.style.color="var(--green)"; msg.textContent="✓ Request sent. You'll be emailed once approved."; });
 }
@@ -719,6 +727,8 @@ function logsFor(taskId){ return state.logs.filter(l=>l.taskId===taskId).sort((a
 function latestLog(taskId){ const l=logsFor(taskId); return l.length?l[0]:null; }
 function nameOf(email){ if(!email) return ""; const n=state.people&&state.people[String(email).toLowerCase()]; return (n&&String(n).trim())?n:email; }
 function filesFor(taskId){ return state.files.filter(f=>f.taskId===taskId); }
+function statusInner(text){ const m=String(text||"").match(/^\s*status\s*:\s*(.+)$/i); return m?m[1].trim():null; }
+function latestStatus(taskId){ const l=logsFor(taskId); for(const e of l){ const s=statusInner(e.comment); if(s) return {text:s, user:e.user, ts:e.ts}; } return null; }
 const STAGE_PIE = {Completed:"var(--green)",InProgress:"var(--amber)",Ordered:"var(--accent)",Approved:"var(--blue)",Proposed:"#b8c4cc",OnHold:"var(--red)"};
 function segPie(ts){
   const order=["Completed","InProgress","Ordered","Approved","Proposed","OnHold"];
@@ -932,8 +942,8 @@ function renderSegment(name){
     const p=prio(x);
     const owners=ownersOf(x);
     const chips = owners.length ? `<div class="chips">${owners.map(o=>`<span class="chip ${o.toLowerCase()==="tba"?"tba":""}">${esc(o)}</span>`).join("")}</div>` : `<span class="chip tba">TBA</span>`;
-    const ll=latestLog(x.id);
-    const statusCell = ll ? `<div class="cmt">${esc(ll.comment)}</div><div class="meta">${esc(nameOf(ll.user))} · ${esc(fmtTs(ll.ts))}</div>` : `<span class="none">—</span>`;
+    const ll=latestStatus(x.id);
+    const statusCell = ll ? `<div class="cmt">${esc(ll.text)}</div><div class="meta">${esc(nameOf(ll.user))} · ${esc(fmtTs(ll.ts))}</div>` : `<span class="none">—</span>`;
     const nLogs=logsFor(x.id).length, nFiles=filesFor(x.id).length;
     html+=`<tr>
       <td class="prio"><span class="pill pr${p}" title="${PRIORITY_LABELS[p]}">${p}</span></td>
@@ -1015,9 +1025,11 @@ function renderLog(){
   let html="";
   if(!entries.length) html=`<div class="log-empty">No updates yet. Be the first to add a comment below.</div>`;
   for(const e of entries){
+    const si=statusInner(e.comment);
+    const body=si?`<span class="statustag">★ Status</span> ${esc(si)}`:esc(e.comment);
     html+=`<div class="log-entry">
       <div class="top"><span class="who">${esc(nameOf(e.user)||"—")}</span><span>${esc(fmtTs(e.ts))}</span></div>
-      <div class="cmt">${esc(e.comment)}</div>
+      <div class="cmt">${body}</div>
       ${su?`<div class="ctrls"><button class="rowbtn" title="Edit" onclick="editLogEntry('${e.logId}')">✏️</button><button class="rowbtn" title="Delete" onclick="deleteLogEntry('${e.logId}')">🗑️</button></div>`:""}
     </div>`;
   }
@@ -1123,7 +1135,7 @@ function renderDetail(){
   const x=state.tasks.find(t=>t.id===currentDetailTask); if(!x) return;
   const p=prio(x); const owners=ownersOf(x);
   const chips = owners.length ? owners.map(o=>`<span class="chip ${o.toLowerCase()==="tba"?"tba":""}">${esc(o)}</span>`).join("") : `<span class="chip tba">TBA</span>`;
-  const ll=latestLog(x.id); const comments=logsFor(x.id); const files=filesFor(x.id);
+  const ll=latestStatus(x.id); const comments=logsFor(x.id); const files=filesFor(x.id);
   document.getElementById("dtTitle").textContent=x.task;
   let html=`<div class="dt-grid">
     <div><span class="dt-l">Segment</span><span class="dt-v">${esc(x.segment)}</span></div>
@@ -1136,10 +1148,10 @@ function renderDetail(){
     <div><span class="dt-l">Due date</span><span class="dt-v">${fmtDate(x.due)}</span></div>
   </div>`;
   if(x.details) html+=`<div class="dt-block"><span class="dt-l">Details</span><div class="dt-v">${esc(x.details)}</div></div>`;
-  html+=`<div class="dt-block"><span class="dt-l">Current status</span><div class="dt-v">${ll?esc(ll.comment)+` <span style="color:var(--muted)">— ${esc(nameOf(ll.user))}, ${esc(fmtTs(ll.ts))}</span>`:"—"}</div></div>`;
+  html+=`<div class="dt-block"><span class="dt-l">Current status</span><div class="dt-v">${ll?esc(ll.text)+` <span style="color:var(--muted)">— ${esc(nameOf(ll.user))}, ${esc(fmtTs(ll.ts))}</span>`:"—"}</div></div>`;
   html+=`<div class="dt-block"><span class="dt-l">Comments (${comments.length})</span>`;
   if(!comments.length) html+=`<div class="dt-v" style="color:var(--muted)">No comments yet.</div>`;
-  for(const e of comments) html+=`<div class="log-entry"><div class="top"><span class="who">${esc(nameOf(e.user)||"—")}</span><span>${esc(fmtTs(e.ts))}</span></div><div class="cmt">${esc(e.comment)}</div></div>`;
+  for(const e of comments){ const si=statusInner(e.comment); const body=si?`<span class="statustag">★ Status</span> ${esc(si)}`:esc(e.comment); html+=`<div class="log-entry"><div class="top"><span class="who">${esc(nameOf(e.user)||"—")}</span><span>${esc(fmtTs(e.ts))}</span></div><div class="cmt">${body}</div></div>`; }
   html+=`</div>`;
   html+=`<div class="dt-block"><span class="dt-l">Files (${files.length})</span>`;
   if(!files.length) html+=`<div class="dt-v" style="color:var(--muted)">No files.</div>`;
@@ -1169,7 +1181,7 @@ function renderUsers(){
   for(const u of us){
     const sup=u.email===(state.superAdmin||SUPER_ADMIN).toLowerCase();
     html+=`<div class="userrow">
-      <div class="uinfo"><b>${esc(u.name||u.email)}</b><span class="umail">${esc(u.email)}</span></div>
+      <div class="uinfo"><b>${esc(u.name||u.email)}</b><span class="umail">${esc(u.email)}${u.phone?" · "+esc(u.phone):""}</span></div>
       <div class="uctl">
         <span class="ustatus us-${esc(u.status)}">${esc(u.status)}</span>
         ${sup?`<span class="role-badge role-super">SUPER</span>`
