@@ -21,13 +21,20 @@
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{font-family:Georgia,'Times New Roman',serif; background:linear-gradient(180deg,var(--sky),var(--bg) 55%) fixed; color:var(--text); min-height:100vh; transition:background .3s,color .3s;}
-  .pagoda-bg{position:fixed; left:50%; bottom:0; transform:translateX(-50%); width:min(820px,96vw); z-index:-1; pointer-events:none; opacity:.09; color:var(--accent); line-height:0;}
+  .pagoda-bg{position:fixed; left:50%; bottom:0; transform:translateX(-50%); width:min(900px,98vw); z-index:-1; pointer-events:none; opacity:.11; line-height:0;}
   .pagoda-bg svg{width:100%; height:auto; display:block;}
-  [data-theme="dark"] .pagoda-bg{opacity:.18;}
+  [data-theme="dark"] .pagoda-bg{opacity:.20;}
+  /* login hero scene */
+  .login-scene{position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+  .login-scene .ground{position:absolute; left:0; right:0; bottom:0; height:24%; background:linear-gradient(180deg,#d8edcc,#a6d597);}
+  [data-theme="dark"] .login-scene .ground{background:linear-gradient(180deg,#1b3326,#11221a);}
+  .login-scene .lp{position:absolute; left:50%; bottom:13%; transform:translateX(-50%); width:min(600px,86vw); height:auto; filter:drop-shadow(0 8px 18px rgba(120,90,10,.30));}
   button, input, select, textarea{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; font-size:14px;}
 
-  #loginScreen{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:transparent; z-index:100;}
-  .login-card{background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); padding:44px 40px; width:min(420px,92vw); text-align:center;}
+  #loginScreen{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#bfe1f4 0%, #dceef8 45%, #eaf5ec 100%); z-index:100; overflow:hidden;}
+  [data-theme="dark"] #loginScreen{background:linear-gradient(180deg,#10222f 0%, #0e1a23 55%, #12241c 100%);}
+  .login-card{position:relative; z-index:2; background:rgba(255,255,255,.9); backdrop-filter:blur(4px); border:1px solid var(--border); border-radius:16px; box-shadow:0 10px 34px rgba(28,60,90,.18); padding:44px 40px; width:min(420px,92vw); text-align:center;}
+  [data-theme="dark"] .login-card{background:rgba(22,36,47,.9);}
   .login-card .wheel{font-size:44px; margin-bottom:10px;}
   .login-card h1{font-size:22px; margin-bottom:4px;}
   .login-card p{color:var(--muted); font-size:14px; margin-bottom:24px;}
@@ -129,7 +136,7 @@
   .seg-note{background:var(--amber-soft); color:var(--amber); border-radius:10px; padding:10px 14px; font-size:13px; font-family:sans-serif; margin-bottom:14px;}
 
   .tablewrap{background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow-x:auto; box-shadow:var(--shadow);}
-  table{width:100%; border-collapse:collapse; font-family:sans-serif; font-size:13.5px; min-width:1040px;}
+  table{width:100%; border-collapse:collapse; font-family:sans-serif; font-size:13.5px; min-width:1180px;}
   th{background:var(--surface2); text-align:left; padding:11px 12px; font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); border-bottom:1px solid var(--border); white-space:nowrap;}
   th.sortable{cursor:pointer; user-select:none;}
   th.sortable:hover{color:var(--accent);}
@@ -147,6 +154,13 @@
   .chips{display:flex; flex-wrap:wrap; gap:4px;}
   .chip{background:var(--blue-soft); color:var(--blue); border-radius:999px; padding:2px 9px; font-size:11.5px; font-weight:600; white-space:nowrap;}
   .chip.tba{background:var(--grey-soft); color:var(--muted);}
+  .tasklink{cursor:pointer; border-bottom:1px dotted var(--muted);}
+  .tasklink:hover{color:var(--accent); border-bottom-color:var(--accent);}
+  .dt-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-bottom:12px; font-family:sans-serif;}
+  .dt-l{display:block; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:2px;}
+  .dt-v{font-size:14px;}
+  .dt-block{margin-bottom:14px; font-family:sans-serif;}
+  .dt-block .log-entry{margin-top:6px;}
   .badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap;}
   .st-Proposed{background:var(--grey-soft); color:var(--muted);}
   .st-Approved{background:var(--blue-soft); color:var(--blue);}
@@ -203,34 +217,50 @@
 </head>
 <body>
 
-<!-- PAGODA BACKGROUND (original artwork) -->
-<div class="pagoda-bg" aria-hidden="true">
-<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor">
-  <path d="M40 288 H360 V296 H40 Z"/>
-  <path d="M70 288 L330 288 L306 266 L94 266 Z"/>
-  <path d="M108 266 L292 266 L274 248 L126 248 Z"/>
-  <path d="M140 248 L260 248 L248 232 L152 232 Z"/>
-  <path d="M152 232 C144 176 158 132 200 132 C242 132 256 176 248 232 Z"/>
-  <path d="M185 118 H215 V132 H185 Z"/>
-  <path d="M189 118 L211 118 L207 108 L193 108 Z"/>
-  <path d="M193 108 L207 108 L204 99 L196 99 Z"/>
-  <path d="M197 99 L203 99 L200 66 Z"/>
-  <ellipse cx="200" cy="86" rx="12" ry="2.4"/>
-  <ellipse cx="200" cy="78" rx="9" ry="2.2"/>
-  <ellipse cx="200" cy="71" rx="6" ry="2"/>
-  <circle cx="200" cy="60" r="4"/>
-  <circle cx="200" cy="52" r="2.2"/>
-  <path d="M88 266 C85 238 98 222 118 222 C138 222 151 238 148 266 Z"/>
-  <path d="M114 222 L122 222 L118 200 Z"/>
-  <circle cx="118" cy="198" r="3"/>
-  <path d="M252 266 C249 238 262 222 282 222 C302 222 315 238 312 266 Z"/>
-  <path d="M278 222 L286 222 L282 200 Z"/>
-  <circle cx="282" cy="198" r="3"/>
-</g></svg>
-</div>
+<!-- GOLDEN PAGODA ARTWORK (original silhouette, inspired by the Global Vipassana Pagoda) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f4dc8b"/><stop offset="0.5" stop-color="#d9a93f"/><stop offset="1" stop-color="#a9781f"/>
+  </linearGradient>
+  <symbol id="pagodaArt" viewBox="0 0 480 320">
+    <g fill="url(#goldGrad)">
+      <path d="M100 300 H380 V308 H100 Z"/>
+      <path d="M120 300 L360 300 L338 282 L142 282 Z"/>
+      <path d="M150 282 L330 282 L312 266 L168 266 Z"/>
+      <path d="M176 266 L304 266 L290 250 L190 250 Z"/>
+      <path d="M190 250 C186 196 206 150 240 150 C274 150 294 196 290 250 Z"/>
+      <path d="M226 150 L254 150 L250 138 L230 138 Z"/>
+      <path d="M230 138 L250 138 L247 128 L233 128 Z"/>
+      <path d="M233 128 L247 128 L245 119 L235 119 Z"/>
+      <path d="M236 119 L244 119 L241 74 L239 74 Z"/>
+      <path d="M239 74 L241 74 L240 56 Z"/>
+      <ellipse cx="240" cy="104" rx="11" ry="2.6"/>
+      <ellipse cx="240" cy="95" rx="8" ry="2.2"/>
+      <ellipse cx="240" cy="86" rx="5.5" ry="1.8"/>
+      <circle cx="240" cy="68" r="3.4"/>
+      <circle cx="240" cy="59" r="1.8"/>
+      <path d="M118 282 C116 264 128 252 146 252 C164 252 176 264 174 282 Z"/>
+      <path d="M142 252 L150 252 L146 230 Z"/><circle cx="146" cy="228" r="2.4"/>
+      <path d="M92 300 C90 286 100 276 114 276 C128 276 138 286 136 300 Z"/>
+      <path d="M110 276 L118 276 L114 258 Z"/><circle cx="114" cy="256" r="2"/>
+      <path d="M306 282 C304 264 316 252 334 252 C352 252 364 264 362 282 Z"/>
+      <path d="M330 252 L338 252 L334 230 Z"/><circle cx="334" cy="228" r="2.4"/>
+      <path d="M344 300 C342 286 352 276 366 276 C380 276 390 286 388 300 Z"/>
+      <path d="M362 276 L370 276 L366 258 Z"/><circle cx="366" cy="256" r="2"/>
+    </g>
+    <g fill="#0000001c">
+      <ellipse cx="240" cy="244" rx="49" ry="3"/>
+      <ellipse cx="240" cy="230" rx="45" ry="2.6"/>
+      <ellipse cx="240" cy="214" rx="40" ry="2.4"/>
+    </g>
+  </symbol>
+</defs></svg>
+
+<div class="pagoda-bg" aria-hidden="true"><svg viewBox="0 0 480 320"><use href="#pagodaArt"/></svg></div>
 
 <!-- LOGIN -->
 <div id="loginScreen">
+  <div class="login-scene"><div class="ground"></div><svg class="lp" viewBox="0 0 480 320" aria-hidden="true"><use href="#pagodaArt"/></svg></div>
   <div class="login-card">
     <div class="wheel">☸️</div>
     <h1>JTC Jambhe Centre</h1>
@@ -294,10 +324,10 @@
   </div>
 </div>
 
-<!-- ACTION LOG MODAL -->
+<!-- COMMENTS MODAL -->
 <div class="overlay" id="logOverlay">
   <div class="modal">
-    <h3 id="logTitle">Action Log</h3>
+    <h3 id="logTitle">Comments</h3>
     <div class="log-sub" id="logSub"></div>
     <div class="log-list" id="logList"></div>
     <div class="addcmt">
@@ -308,6 +338,41 @@
         <button class="btn-primary" onclick="addComment()">Add comment</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- FILES MODAL -->
+<div class="overlay" id="fileOverlay">
+  <div class="modal">
+    <h3 id="fileTitle">Files</h3>
+    <div class="log-sub" id="fileSub"></div>
+    <div class="log-list" id="fileList"></div>
+    <div id="fileUploadRow" class="addcmt" style="display:none">
+      <label>Attach files (layouts, quotations, invoices…)</label>
+      <input type="file" id="fileInput" multiple style="display:none" onchange="filesSelected(event)">
+      <button class="btn-primary" onclick="document.getElementById('fileInput').click()">📎 Choose files to upload</button>
+      <div style="font-size:11.5px;color:var(--muted);font-family:sans-serif;margin-top:6px">Files are saved to your Google Drive. Keep each under ~10 MB.</div>
+    </div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('fileOverlay')">Close</button></div>
+  </div>
+</div>
+
+<!-- NAME MODAL -->
+<div class="overlay" id="nameOverlay">
+  <div class="modal">
+    <h3>Welcome 🙏</h3>
+    <p style="font-size:13px;color:var(--muted);font-family:sans-serif;margin:6px 0 12px">Please tell us your name, so your updates show your name instead of your email address.</p>
+    <div class="field"><label>Your name</label><input id="f_name" placeholder="e.g. Deepak Deshpande" onkeydown="if(event.key==='Enter')saveName()"></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="skipName()">Later</button><button class="btn-primary" onclick="saveName()">Save</button></div>
+  </div>
+</div>
+
+<!-- TASK DETAIL MODAL -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal">
+    <h3 id="dtTitle">Task</h3>
+    <div id="dtBody"></div>
+    <div class="modal-actions" id="dtActions"></div>
   </div>
 </div>
 
@@ -350,6 +415,8 @@ const SEED = {
   superAdmin: SUPER_ADMIN,
   admins: [...DEFAULT_ADMINS],
   logs: [],
+  people: {},
+  files: [],
   segments: [
     {name:"Dhamma Hall", note:""},
     {name:"Mini Dhamma Hall", note:"The mini Dhamma Hall was inspected and has a sitting capacity of 30–40 students."},
@@ -375,8 +442,8 @@ const SEED = {
    STATE
    ===================================================== */
 const LS_DATA="jtc_dashboard_data", LS_THEME="jtc_theme", LS_USER="jtc_user";
-let state={segments:[],tasks:[],admins:[],logs:[],superAdmin:SUPER_ADMIN};
-let currentTab="Overview", currentUser=null, editingId=null, searchQ="", currentLogTask=null;
+let state={segments:[],tasks:[],admins:[],logs:[],people:{},files:[],superAdmin:SUPER_ADMIN};
+let currentTab="Overview", currentUser=null, editingId=null, searchQ="", currentLogTask=null, currentFileTask=null, currentDetailTask=null;
 let sortKey="priority", sortDir=1;
 let calYear, calMonth, calSelected=null;
 
@@ -405,6 +472,8 @@ function applyServer(d){
     tasks:d.tasks,
     admins:(d.admins&&d.admins.length)?d.admins:[...DEFAULT_ADMINS],
     logs:Array.isArray(d.logs)?d.logs:[],
+    people:(d.people&&typeof d.people==="object")?d.people:{},
+    files:Array.isArray(d.files)?d.files:[],
     superAdmin:d.superAdmin||SUPER_ADMIN
   };
   saveCache(); return true;
@@ -432,6 +501,7 @@ function loadCache(){
 }
 function normalize(d){
   d.logs=Array.isArray(d.logs)?d.logs:[]; d.admins=d.admins||[...DEFAULT_ADMINS];
+  d.people=(d.people&&typeof d.people==="object")?d.people:{}; d.files=Array.isArray(d.files)?d.files:[];
   d.superAdmin=d.superAdmin||SUPER_ADMIN; d.segments=d.segments||[]; d.tasks=d.tasks||[];
   return d;
 }
@@ -467,6 +537,7 @@ function enterApp(){
   if(API_LIVE){ dot.className="livedot"; lt.textContent="Live · synced to Google Sheet"; }
   else{ dot.className="livedot off"; lt.textContent="Offline demo — not connected yet"; }
   render();
+  maybeAskName();
 }
 
 /* =====================================================
@@ -485,6 +556,8 @@ function ownersOf(x){ return String(x.owner||"").split(/[,;]/).map(s=>s.trim()).
 function qtyDisp(x){ return (x.quantity===0||x.quantity)&&String(x.quantity)!=="" ? esc(String(x.quantity)) : "—"; }
 function logsFor(taskId){ return state.logs.filter(l=>l.taskId===taskId).sort((a,b)=> (String(a.ts)<String(b.ts)?1:-1)); }
 function latestLog(taskId){ const l=logsFor(taskId); return l.length?l[0]:null; }
+function nameOf(email){ if(!email) return ""; const n=state.people&&state.people[String(email).toLowerCase()]; return (n&&String(n).trim())?n:email; }
+function filesFor(taskId){ return state.files.filter(f=>f.taskId===taskId); }
 
 /* =====================================================
    RENDER
@@ -645,31 +718,33 @@ function renderSegment(name){
     <th>Status (latest)</th>
     <th class="sortable" onclick="setSort('due')">Due ${arrow("due")}</th>
     <th class="sortable" style="text-align:right" onclick="setSort('cost')">Cost (₹) ${arrow("cost")}</th>
-    <th>Log</th>${admin?"<th></th>":""}
+    <th>Comments</th>
+    <th>Files</th>${admin?"<th></th>":""}
   </tr></thead><tbody>`;
-  const cols=admin?10:9;
+  const cols=admin?11:10;
   if(!ts.length) html+=`<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);padding:26px">No tasks${searchQ?" match your search":""}.</td></tr>`;
   for(const x of ts){
     const p=prio(x);
     const owners=ownersOf(x);
     const chips = owners.length ? `<div class="chips">${owners.map(o=>`<span class="chip ${o.toLowerCase()==="tba"?"tba":""}">${esc(o)}</span>`).join("")}</div>` : `<span class="chip tba">TBA</span>`;
     const ll=latestLog(x.id);
-    const statusCell = ll ? `<div class="cmt">${esc(ll.comment)}</div><div class="meta">${esc(ll.user)} · ${esc(fmtTs(ll.ts))}</div>` : `<span class="none">—</span>`;
-    const nLogs=logsFor(x.id).length;
+    const statusCell = ll ? `<div class="cmt">${esc(ll.comment)}</div><div class="meta">${esc(nameOf(ll.user))} · ${esc(fmtTs(ll.ts))}</div>` : `<span class="none">—</span>`;
+    const nLogs=logsFor(x.id).length, nFiles=filesFor(x.id).length;
     html+=`<tr>
       <td class="prio"><span class="pill pr${p}" title="${PRIORITY_LABELS[p]}">${p}</span></td>
-      <td class="taskname">${esc(x.task)}</td>
+      <td class="taskname"><span class="tasklink" onclick="openTask('${x.id}')">${esc(x.task)}</span></td>
       <td class="qty">${qtyDisp(x)}</td>
       <td>${chips}</td>
       <td><span class="badge st-${x.stage}">${STAGE_LABELS[x.stage]||esc(x.stage)}</span></td>
       <td class="status">${statusCell}</td>
       <td>${fmtDate(x.due)}</td>
       <td class="cost">${inr(x.cost)}</td>
-      <td><button class="loglink" onclick="openLog('${x.id}')">🗒 Log${nLogs?`<span class="n">${nLogs}</span>`:""}</button></td>
+      <td><button class="loglink" onclick="openLog('${x.id}')">💬${nLogs?`<span class="n">${nLogs}</span>`:" Add"}</button></td>
+      <td><button class="loglink" onclick="openFiles('${x.id}')">📎${nFiles?`<span class="n">${nFiles}</span>`:" Files"}</button></td>
       ${admin?`<td style="white-space:nowrap"><button class="rowbtn" title="Edit" onclick="openEditTask('${x.id}')">✏️</button></td>`:""}
     </tr>`;
   }
-  html+=`</tbody><tfoot><tr><td colspan="7">Segment total</td><td class="cost">${inr(totalCost)}</td><td></td>${admin?"<td></td>":""}</tr></tfoot></table></div>`;
+  html+=`</tbody><tfoot><tr><td colspan="7">Segment total</td><td class="cost">${inr(totalCost)}</td><td></td><td></td>${admin?"<td></td>":""}</tr></tfoot></table></div>`;
   document.getElementById("content").innerHTML=html;
 }
 
@@ -729,14 +804,14 @@ function closeModal(id){ document.getElementById(id).classList.remove("show"); }
 function openLog(taskId){ currentLogTask=taskId; renderLog(); document.getElementById("logOverlay").classList.add("show"); setTimeout(()=>{const c=document.getElementById("logComment"); if(c) c.focus();},50); }
 function renderLog(){
   const x=state.tasks.find(t=>t.id===currentLogTask); if(!x) return;
-  document.getElementById("logTitle").textContent="🗒 "+x.task;
+  document.getElementById("logTitle").textContent="💬 "+x.task;
   document.getElementById("logSub").innerHTML=`${esc(x.segment)}${x.details?" · "+esc(x.details):""}`;
   const entries=logsFor(currentLogTask); const su=isSuper();
   let html="";
   if(!entries.length) html=`<div class="log-empty">No updates yet. Be the first to add a comment below.</div>`;
   for(const e of entries){
     html+=`<div class="log-entry">
-      <div class="top"><span class="who">${esc(e.user||"—")}</span><span>${esc(fmtTs(e.ts))}</span></div>
+      <div class="top"><span class="who">${esc(nameOf(e.user)||"—")}</span><span>${esc(fmtTs(e.ts))}</span></div>
       <div class="cmt">${esc(e.comment)}</div>
       ${su?`<div class="ctrls"><button class="rowbtn" title="Edit" onclick="editLogEntry('${e.logId}')">✏️</button><button class="rowbtn" title="Delete" onclick="deleteLogEntry('${e.logId}')">🗑️</button></div>`:""}
     </div>`;
@@ -764,6 +839,110 @@ function deleteLogEntry(logId){
   if(!confirm("Delete this log entry?")) return;
   state.logs=state.logs.filter(l=>l.logId!==logId);
   persist({action:"deleteLog", logId:logId, user:currentUser}, null, ()=>renderLog());
+}
+
+/* =====================================================
+   FILE ATTACHMENTS
+   ===================================================== */
+function openFiles(taskId){ currentFileTask=taskId; renderFiles(); document.getElementById("fileOverlay").classList.add("show"); }
+function renderFiles(){
+  const x=state.tasks.find(t=>t.id===currentFileTask); if(!x) return;
+  document.getElementById("fileTitle").textContent="📎 "+x.task;
+  document.getElementById("fileSub").textContent=x.segment;
+  const items=filesFor(currentFileTask); const admin=isAdmin();
+  let html="";
+  if(!items.length) html=`<div class="log-empty">No files yet.${admin?" Use the button below to attach layouts, quotations or invoices.":""}</div>`;
+  for(const f of items){
+    html+=`<div class="log-entry">
+      <div class="top"><span class="who">${esc(f.fileName)}</span><span>${esc(fmtTs(f.ts))}</span></div>
+      <div class="cmt"><a href="${esc(f.url)}" target="_blank" rel="noopener">Open / download ↗</a> · <span style="color:var(--muted)">${esc(nameOf(f.uploadedBy))}</span></div>
+      ${admin?`<div class="ctrls"><button class="rowbtn" title="Remove" onclick="deleteFileEntry('${f.attId}')">🗑️</button></div>`:""}
+    </div>`;
+  }
+  document.getElementById("fileList").innerHTML=html;
+  document.getElementById("fileUploadRow").style.display=admin?"":"none";
+}
+function readAsDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+async function filesSelected(ev){
+  const files=[...ev.target.files]; ev.target.value=""; if(!files.length) return;
+  if(!API_LIVE){ toast("Connect to the sheet to upload files"); return; }
+  const task=currentFileTask;
+  for(const f of files){
+    if(f.size>10*1024*1024){ toast(f.name+" is over 10 MB — skipped"); continue; }
+    toast("Uploading "+f.name+"…");
+    try{
+      const dataUrl=await readAsDataURL(f);
+      const b64=String(dataUrl).split(",")[1];
+      await apiWrite({action:"addFile", taskId:task, fileName:f.name, mimeType:f.type, dataBase64:b64, user:currentUser});
+    }catch(e){ toast("Upload failed for "+f.name); }
+  }
+  try{ await refreshFromServer(); }catch(e){}
+  render(); renderFiles(); toast("Attachments updated");
+}
+function deleteFileEntry(attId){
+  if(!isAdmin()) return;
+  if(!confirm("Remove this file?")) return;
+  state.files=state.files.filter(f=>f.attId!==attId);
+  persist({action:"deleteFile", attId:attId, user:currentUser}, null, ()=>renderFiles());
+}
+
+/* =====================================================
+   NAME REGISTRY
+   ===================================================== */
+function maybeAskName(){
+  if(!currentUser) return;
+  if(state.people && state.people[currentUser.toLowerCase()]) return;
+  if(localStorage.getItem("jtc_nameskip")==="1") return;
+  document.getElementById("f_name").value="";
+  document.getElementById("nameOverlay").classList.add("show");
+}
+function saveName(){
+  const nm=document.getElementById("f_name").value.trim();
+  if(!nm){ toast("Please enter your name"); return; }
+  state.people[currentUser.toLowerCase()]=nm;
+  closeModal("nameOverlay");
+  persist({action:"setName", email:currentUser, name:nm}, null);
+  toast("Thanks, "+nm.split(" ")[0]+"!");
+}
+function skipName(){ localStorage.setItem("jtc_nameskip","1"); closeModal("nameOverlay"); }
+
+/* =====================================================
+   TASK DETAIL (click a task name)
+   ===================================================== */
+function openTask(id){ currentDetailTask=id; renderDetail(); document.getElementById("detailOverlay").classList.add("show"); }
+function renderDetail(){
+  const x=state.tasks.find(t=>t.id===currentDetailTask); if(!x) return;
+  const p=prio(x); const owners=ownersOf(x);
+  const chips = owners.length ? owners.map(o=>`<span class="chip ${o.toLowerCase()==="tba"?"tba":""}">${esc(o)}</span>`).join("") : `<span class="chip tba">TBA</span>`;
+  const ll=latestLog(x.id); const comments=logsFor(x.id); const files=filesFor(x.id);
+  document.getElementById("dtTitle").textContent=x.task;
+  let html=`<div class="dt-grid">
+    <div><span class="dt-l">Segment</span><span class="dt-v">${esc(x.segment)}</span></div>
+    <div><span class="dt-l">Priority</span><span class="dt-v"><span class="pill pr${p}">${p}</span> ${esc(PRIORITY_LABELS[p])}</span></div>
+    <div><span class="dt-l">Quantity</span><span class="dt-v">${qtyDisp(x)}</span></div>
+    <div><span class="dt-l">Stage</span><span class="dt-v"><span class="badge st-${x.stage}">${STAGE_LABELS[x.stage]||esc(x.stage)}</span></span></div>
+    <div><span class="dt-l">Owner(s)</span><span class="dt-v"><span class="chips">${chips}</span></span></div>
+    <div><span class="dt-l">Cost</span><span class="dt-v">${inr(x.cost)}</span></div>
+    <div><span class="dt-l">Proposed</span><span class="dt-v">${fmtDate(x.proposed)}</span></div>
+    <div><span class="dt-l">Due date</span><span class="dt-v">${fmtDate(x.due)}</span></div>
+  </div>`;
+  if(x.details) html+=`<div class="dt-block"><span class="dt-l">Details</span><div class="dt-v">${esc(x.details)}</div></div>`;
+  html+=`<div class="dt-block"><span class="dt-l">Current status</span><div class="dt-v">${ll?esc(ll.comment)+` <span style="color:var(--muted)">— ${esc(nameOf(ll.user))}, ${esc(fmtTs(ll.ts))}</span>`:"—"}</div></div>`;
+  html+=`<div class="dt-block"><span class="dt-l">Comments (${comments.length})</span>`;
+  if(!comments.length) html+=`<div class="dt-v" style="color:var(--muted)">No comments yet.</div>`;
+  for(const e of comments) html+=`<div class="log-entry"><div class="top"><span class="who">${esc(nameOf(e.user)||"—")}</span><span>${esc(fmtTs(e.ts))}</span></div><div class="cmt">${esc(e.comment)}</div></div>`;
+  html+=`</div>`;
+  html+=`<div class="dt-block"><span class="dt-l">Files (${files.length})</span>`;
+  if(!files.length) html+=`<div class="dt-v" style="color:var(--muted)">No files.</div>`;
+  for(const f of files) html+=`<div class="dt-v" style="padding:3px 0"><a href="${esc(f.url)}" target="_blank" rel="noopener">📎 ${esc(f.fileName)} ↗</a></div>`;
+  html+=`</div>`;
+  document.getElementById("dtBody").innerHTML=html;
+  const admin=isAdmin();
+  document.getElementById("dtActions").innerHTML=
+    `<button class="btn-secondary" onclick="closeModal('detailOverlay')">Close</button>`+
+    `<button class="btn-secondary" onclick="closeModal('detailOverlay');openFiles('${x.id}')">📎 Files</button>`+
+    `<button class="btn-primary" onclick="closeModal('detailOverlay');openLog('${x.id}')">💬 Comments</button>`+
+    (admin?`<button class="btn-primary" onclick="closeModal('detailOverlay');openEditTask('${x.id}')">✏️ Edit</button>`:"");
 }
 
 /* =====================================================
@@ -802,12 +981,12 @@ function removeAdmin(em){
    ===================================================== */
 function download(filename, text, type){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=filename; a.click(); URL.revokeObjectURL(a.href); }
 function exportCSV(){
-  const rows=[["Segment","Task","Qty","Owners","Stage","Priority","Latest Status","Updated by","Updated at","Proposed","Due","Cost (INR)","Details"]];
+  const rows=[["Segment","Task","Qty","Owners","Stage","Priority","Latest Status","Updated by","Updated at","Proposed","Due","Cost (INR)","Files","Details"]];
   const ordered=state.tasks.slice().sort((a,b)=> prio(a)-prio(b) || a.segment.localeCompare(b.segment));
   for(const x of ordered){
     const ll=latestLog(x.id);
     rows.push([x.segment,x.task,(x.quantity??""),ownersOf(x).join(" | "),STAGE_LABELS[x.stage]||x.stage,prio(x),
-      ll?ll.comment:"",ll?ll.user:"",ll?fmtTs(ll.ts):"",x.proposed,x.due,x.cost||0,x.details]);
+      ll?ll.comment:"",ll?nameOf(ll.user):"",ll?fmtTs(ll.ts):"",x.proposed,x.due,x.cost||0,filesFor(x.id).length,x.details]);
   }
   const csv=rows.map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
   download("jambhe-centre-tasks.csv","﻿"+csv,"text/csv"); toast("CSV downloaded");
