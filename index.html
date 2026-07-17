@@ -161,6 +161,28 @@
   .dt-v{font-size:14px;}
   .dt-block{margin-bottom:14px; font-family:sans-serif;}
   .dt-block .log-entry{margin-top:6px;}
+  /* dhamma chakra + home button */
+  .chakra{width:30px; height:30px; color:#1a3f8f; display:block;}
+  [data-theme="dark"] .chakra{color:#7aaede;}
+  .login-chakra{width:54px; height:54px; color:#1a3f8f; margin:0 auto 10px; display:block;}
+  [data-theme="dark"] .login-chakra{color:#7aaede;}
+  .homebtn{background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center;}
+  .homebtn:hover .chakra{filter:brightness(1.15);}
+  /* clickable KPI */
+  .kpi-click{cursor:pointer; transition:.15s;}
+  .kpi-click:hover{border-color:var(--accent); transform:translateY(-2px);}
+  /* filter list rows */
+  .flt{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 11px; border:1px solid var(--border); border-radius:9px; margin-bottom:6px; cursor:pointer; font-family:sans-serif; font-size:13.5px; background:var(--surface2);}
+  .flt:hover{border-color:var(--accent);}
+  .flt-seg{color:var(--muted); font-size:12px; margin-left:6px;}
+  /* per-category pie */
+  .seg-body{display:flex; align-items:center; gap:14px; margin-bottom:4px;}
+  .segpie{width:60px; height:60px; border-radius:50%; flex:none; box-shadow:0 0 0 1px var(--border) inset;}
+  .seg-info{font-family:sans-serif; font-size:13px; color:var(--muted);}
+  .seg-info .cost2{margin-top:4px; color:var(--text); font-weight:600;}
+  .stage-legend{display:flex; flex-wrap:wrap; gap:12px; font-family:sans-serif; font-size:11.5px; color:var(--muted); margin:0 0 14px 2px;}
+  .stage-legend span{display:flex; align-items:center; gap:5px;}
+  .stage-legend .dot{width:10px; height:10px; border-radius:3px;}
   .badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap;}
   .st-Proposed{background:var(--grey-soft); color:var(--muted);}
   .st-Approved{background:var(--blue-soft); color:var(--blue);}
@@ -256,65 +278,89 @@
   </symbol>
   <symbol id="pagodaScene" viewBox="0 0 480 320">
     <use href="#pagodaArt"/>
+    <!-- birds gliding above the pagoda -->
+    <g fill="none" stroke="#42607f" stroke-width="1.5" stroke-linecap="round">
+      <g>
+        <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="16s" repeatCount="indefinite" values="70 66; 200 42; 340 58; 70 66"/>
+        <path d="M0 0 Q3 -3 6 0 Q9 -3 12 0"><animate attributeName="d" dur="0.55s" repeatCount="indefinite" values="M0 0 Q3 -3 6 0 Q9 -3 12 0;M0 1 Q3 -0.6 6 1 Q9 -0.6 12 1;M0 0 Q3 -3 6 0 Q9 -3 12 0"/></path>
+      </g>
+      <g>
+        <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="13s" repeatCount="indefinite" values="330 52; 200 36; 92 54; 330 52"/>
+        <path d="M0 0 Q2.5 -2.6 5 0 Q7.5 -2.6 10 0"><animate attributeName="d" dur="0.5s" repeatCount="indefinite" values="M0 0 Q2.5 -2.6 5 0 Q7.5 -2.6 10 0;M0 0.8 Q2.5 -0.4 5 0.8 Q7.5 -0.4 10 0.8;M0 0 Q2.5 -2.6 5 0 Q7.5 -2.6 10 0"/></path>
+      </g>
+      <g>
+        <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="20s" repeatCount="indefinite" values="150 32; 250 22; 300 44; 150 32"/>
+        <path d="M0 0 Q2 -2 4 0 Q6 -2 8 0"><animate attributeName="d" dur="0.6s" repeatCount="indefinite" values="M0 0 Q2 -2 4 0 Q6 -2 8 0;M0 0.6 Q2 -0.3 4 0.6 Q6 -0.3 8 0.6;M0 0 Q2 -2 4 0 Q6 -2 8 0"/></path>
+      </g>
+    </g>
+    <!-- meditators, back row (in front of pagoda) -->
+    <g>
+      <g><path d="M202 306 Q210 300 218 306 Z" fill="#d3e2f2"/><path d="M207 305 L213 305 L212.5 298 Q210 296 207.5 298 Z" fill="#d3e2f2"/><circle cx="210" cy="294.5" r="2.7" fill="#e8b98a"/></g>
+      <g><path d="M232 306 Q240 300 248 306 Z" fill="#ead2a6"/><path d="M237 305 L243 305 L242.5 298 Q240 296 237.5 298 Z" fill="#ead2a6"/><circle cx="240" cy="294.5" r="2.7" fill="#e8b98a"/></g>
+      <g><path d="M262 306 Q270 300 278 306 Z" fill="#f3efe2"/><path d="M267 305 L273 305 L272.5 298 Q270 296 267.5 298 Z" fill="#f3efe2"/><circle cx="270" cy="294.5" r="2.7" fill="#e8b98a"/></g>
+    </g>
+    <!-- meditators, front row -->
+    <g>
+      <g><path d="M186 314 Q195 306 204 314 Z" fill="#f3efe2"/><path d="M191.5 313 L198.5 313 L198 304 Q195 301 192 304 Z" fill="#f3efe2"/><circle cx="195" cy="300" r="3.2" fill="#e8b98a"/></g>
+      <g><path d="M209 314 Q218 306 227 314 Z" fill="#ead2a6"/><path d="M214.5 313 L221.5 313 L221 304 Q218 301 215 304 Z" fill="#ead2a6"/><circle cx="218" cy="300" r="3.2" fill="#e8b98a"/></g>
+      <g><path d="M231 314 Q240 305 249 314 Z" fill="#f3efe2"/><path d="M236 313 L244 313 L243.5 303 Q240 300 236.5 303 Z" fill="#f3efe2"/><circle cx="240" cy="299" r="3.4" fill="#e8b98a"/></g>
+      <g><path d="M253 314 Q262 306 271 314 Z" fill="#cfe6dd"/><path d="M258.5 313 L265.5 313 L265 304 Q262 301 259 304 Z" fill="#cfe6dd"/><circle cx="262" cy="300" r="3.2" fill="#e8b98a"/></g>
+      <g><path d="M276 314 Q285 306 294 314 Z" fill="#f3efe2"/><path d="M281.5 313 L288.5 313 L288 304 Q285 301 282 304 Z" fill="#f3efe2"/><circle cx="285" cy="300" r="3.2" fill="#e8b98a"/></g>
+    </g>
+    <!-- studying kids on the sides (with books) -->
+    <g>
+      <g><path d="M40 314 Q48 308 56 314 Z" fill="#2f6db3"/><path d="M45 313 L52 313 L54 306 L48 305 Z" fill="#2f6db3"/><circle cx="52" cy="302.5" r="2.9" fill="#e8b98a"/><rect x="50" y="309" width="9" height="5" rx="1" fill="#faf7ee"/></g>
+      <g><path d="M66 314 Q74 308 82 314 Z" fill="#d9552e"/><path d="M71 313 L78 313 L80 306 L74 305 Z" fill="#d9552e"/><circle cx="78" cy="302.5" r="2.9" fill="#e8b98a"/><rect x="76" y="309" width="9" height="5" rx="1" fill="#faf7ee"/></g>
+      <g><path d="M398 314 Q406 308 414 314 Z" fill="#2f8f6d"/><path d="M403 313 L410 313 L412 306 L406 305 Z" fill="#2f8f6d"/><circle cx="410" cy="302.5" r="2.9" fill="#e8b98a"/><rect x="408" y="309" width="9" height="5" rx="1" fill="#faf7ee"/></g>
+      <g><path d="M424 314 Q432 308 440 314 Z" fill="#7a4fb3"/><path d="M429 313 L436 313 L438 306 L432 305 Z" fill="#7a4fb3"/><circle cx="436" cy="302.5" r="2.9" fill="#e8b98a"/><rect x="434" y="309" width="9" height="5" rx="1" fill="#faf7ee"/></g>
+    </g>
+    <!-- playing kids on the far sides (bouncing) -->
     <g stroke-linecap="round">
-      <!-- running child (red) -->
-      <g stroke="#c0392b" stroke-width="2.4" fill="none">
-        <line x1="52" y1="298" x2="52" y2="307"/><line x1="52" y1="300" x2="47" y2="296"/>
-        <line x1="52" y1="300" x2="57" y2="304"/><line x1="52" y1="307" x2="48" y2="314"/>
-        <line x1="52" y1="307" x2="57" y2="313"/>
-      </g><circle cx="52" cy="294" r="3" fill="#e8b98a"/>
-      <!-- jumping child (teal) -->
-      <g stroke="#2f8f6d" stroke-width="2.4" fill="none">
-        <line x1="82" y1="294" x2="82" y2="303"/><line x1="82" y1="296" x2="77" y2="291"/>
-        <line x1="82" y1="296" x2="87" y2="291"/><line x1="82" y1="303" x2="78" y2="310"/>
-        <line x1="82" y1="303" x2="86" y2="310"/>
-      </g><circle cx="82" cy="290" r="3" fill="#e8b98a"/>
-      <!-- meditating child -->
-      <path d="M141 314 Q150 306 159 314 Z" fill="#f3efe2"/>
-      <path d="M146.5 313 L153.5 313 L153 304 Q150 301 147 304 Z" fill="#f3efe2"/>
-      <circle cx="150" cy="300" r="3.2" fill="#e8b98a"/>
-      <!-- studying child (blue) with book -->
-      <path d="M178 314 Q186 308 194 314 Z" fill="#2f6db3"/>
-      <path d="M183 313 L190 313 L192 306 L186 305 Z" fill="#2f6db3"/>
-      <circle cx="190" cy="302.5" r="2.9" fill="#e8b98a"/>
-      <rect x="188" y="309" width="9" height="5" rx="1" fill="#faf7ee"/>
-      <!-- meditating child (centre) -->
-      <path d="M231 314 Q240 306 249 314 Z" fill="#f3efe2"/>
-      <path d="M236.5 313 L243.5 313 L243 304 Q240 301 237 304 Z" fill="#f3efe2"/>
-      <circle cx="240" cy="300" r="3.2" fill="#e8b98a"/>
-      <!-- studying child (saffron) with book -->
-      <path d="M292 314 Q300 308 308 314 Z" fill="#d9552e"/>
-      <path d="M297 313 L304 313 L306 306 L300 305 Z" fill="#d9552e"/>
-      <circle cx="304" cy="302.5" r="2.9" fill="#e8b98a"/>
-      <rect x="302" y="309" width="9" height="5" rx="1" fill="#faf7ee"/>
-      <!-- meditating child -->
-      <path d="M323 314 Q332 306 341 314 Z" fill="#f3efe2"/>
-      <path d="M328.5 313 L335.5 313 L335 304 Q332 301 329 304 Z" fill="#f3efe2"/>
-      <circle cx="332" cy="300" r="3.2" fill="#e8b98a"/>
-      <!-- child with ball (blue) -->
-      <g stroke="#2f6db3" stroke-width="2.4" fill="none">
-        <line x1="406" y1="298" x2="406" y2="307"/><line x1="406" y1="300" x2="401" y2="303"/>
-        <line x1="406" y1="300" x2="411" y2="298"/><line x1="406" y1="307" x2="402" y2="314"/>
-        <line x1="406" y1="307" x2="410" y2="314"/>
-      </g><circle cx="406" cy="294" r="3" fill="#e8b98a"/>
-      <circle cx="416" cy="311" r="3" fill="#e0a92e"/>
-      <!-- running child (yellow) -->
-      <g stroke="#e0a92e" stroke-width="2.4" fill="none">
-        <line x1="440" y1="298" x2="440" y2="307"/><line x1="440" y1="300" x2="445" y2="296"/>
-        <line x1="440" y1="300" x2="435" y2="304"/><line x1="440" y1="307" x2="444" y2="314"/>
-        <line x1="440" y1="307" x2="435" y2="313"/>
-      </g><circle cx="440" cy="294" r="3" fill="#e8b98a"/>
+      <g>
+        <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="0.85s" repeatCount="indefinite" values="0 0; 0 -3.5; 0 0"/>
+        <g stroke="#c0392b" stroke-width="2.4" fill="none"><line x1="22" y1="298" x2="22" y2="307"/><line x1="22" y1="300" x2="17" y2="296"/><line x1="22" y1="300" x2="27" y2="304"/><line x1="22" y1="307" x2="18" y2="314"/><line x1="22" y1="307" x2="27" y2="313"/></g><circle cx="22" cy="294" r="3" fill="#e8b98a"/>
+      </g>
+      <g>
+        <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="0.7s" repeatCount="indefinite" values="0 0; 0 -6; 0 0"/>
+        <g stroke="#e0a92e" stroke-width="2.4" fill="none"><line x1="98" y1="294" x2="98" y2="303"/><line x1="98" y1="296" x2="93" y2="291"/><line x1="98" y1="296" x2="103" y2="291"/><line x1="98" y1="303" x2="94" y2="310"/><line x1="98" y1="303" x2="102" y2="310"/></g><circle cx="98" cy="290" r="3" fill="#e8b98a"/>
+      </g>
+      <g>
+        <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="0.8s" repeatCount="indefinite" values="0 0; 0 -3; 0 0"/>
+        <g stroke="#2f6db3" stroke-width="2.4" fill="none"><line x1="384" y1="298" x2="384" y2="307"/><line x1="384" y1="300" x2="379" y2="303"/><line x1="384" y1="300" x2="389" y2="298"/><line x1="384" y1="307" x2="380" y2="314"/><line x1="384" y1="307" x2="388" y2="314"/></g><circle cx="384" cy="294" r="3" fill="#e8b98a"/><circle cx="394" cy="311" r="3" fill="#e0a92e"/>
+      </g>
+      <g>
+        <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="0.9s" repeatCount="indefinite" values="0 0; 0 -3.5; 0 0"/>
+        <g stroke="#2f8f6d" stroke-width="2.4" fill="none"><line x1="458" y1="298" x2="458" y2="307"/><line x1="458" y1="300" x2="463" y2="296"/><line x1="458" y1="300" x2="453" y2="304"/><line x1="458" y1="307" x2="462" y2="314"/><line x1="458" y1="307" x2="453" y2="313"/></g><circle cx="458" cy="294" r="3" fill="#e8b98a"/>
+      </g>
+    </g>
+  </symbol>
+  <symbol id="chakra" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="5"/>
+    <circle cx="50" cy="50" r="8.5" fill="currentColor"/>
+    <g stroke="currentColor" stroke-width="2.3">
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(0 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(15 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(30 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(45 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(60 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(75 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(90 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(105 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(120 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(135 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(150 50 50)"/>
+      <line x1="50" y1="9" x2="50" y2="91" transform="rotate(165 50 50)"/>
     </g>
   </symbol>
 </defs></svg>
 
-<div class="pagoda-bg" aria-hidden="true"><svg viewBox="0 0 480 320"><use href="#pagodaScene"/></svg></div>
+<div class="pagoda-bg" aria-hidden="true"><svg viewBox="0 0 480 320"><use href="#pagodaArt"/></svg></div>
 
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-scene"><div class="ground"></div><svg class="lp" viewBox="0 0 480 320" aria-hidden="true"><use href="#pagodaScene"/></svg></div>
   <div class="login-card">
-    <div class="wheel">☸️</div>
+    <svg class="login-chakra" viewBox="0 0 100 100" aria-hidden="true"><use href="#chakra"/></svg>
     <h1>Jambhe Teenagers Vipassana Centre</h1>
     <p>Operational Readiness Dashboard</p>
     <input type="email" id="loginEmail" placeholder="Enter your email address" onkeydown="if(event.key==='Enter')doLogin()">
@@ -329,7 +375,7 @@
 <div id="app" style="display:none">
 <header>
   <div class="title">
-    <span class="wheel">☸️</span>
+    <button class="homebtn" onclick="switchTab('Overview')" title="Home"><svg class="chakra" viewBox="0 0 100 100" aria-hidden="true"><use href="#chakra"/></svg></button>
     <div>
       <h1>Jambhe Teenagers Vipassana Centre</h1>
       <div class="sub"><span class="livedot" id="liveDot"></span><span id="liveText">Live · synced to Google Sheet</span></div>
@@ -425,6 +471,15 @@
     <h3 id="dtTitle">Task</h3>
     <div id="dtBody"></div>
     <div class="modal-actions" id="dtActions"></div>
+  </div>
+</div>
+
+<!-- FILTER (KPI) MODAL -->
+<div class="overlay" id="filterOverlay">
+  <div class="modal">
+    <h3 id="filterTitle">Tasks</h3>
+    <div class="log-list" id="filterList" style="max-height:62vh"></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('filterOverlay')">Close</button></div>
   </div>
 </div>
 
@@ -610,6 +665,40 @@ function logsFor(taskId){ return state.logs.filter(l=>l.taskId===taskId).sort((a
 function latestLog(taskId){ const l=logsFor(taskId); return l.length?l[0]:null; }
 function nameOf(email){ if(!email) return ""; const n=state.people&&state.people[String(email).toLowerCase()]; return (n&&String(n).trim())?n:email; }
 function filesFor(taskId){ return state.files.filter(f=>f.taskId===taskId); }
+const STAGE_PIE = {Completed:"var(--green)",InProgress:"var(--amber)",Ordered:"var(--accent)",Approved:"var(--blue)",Proposed:"#b8c4cc",OnHold:"var(--red)"};
+function segPie(ts){
+  const order=["Completed","InProgress","Ordered","Approved","Proposed","OnHold"];
+  const total=ts.length||1; let acc=0; const stops=[];
+  for(const st of order){
+    const c=ts.filter(x=>x.stage===st).length; if(!c) continue;
+    const start=(acc/total*100).toFixed(2); acc+=c; const end=(acc/total*100).toFixed(2);
+    stops.push(`${STAGE_PIE[st]} ${start}% ${end}%`);
+  }
+  if(!stops.length) stops.push("#b8c4cc 0% 100%");
+  return "conic-gradient("+stops.join(",")+")";
+}
+function matchKind(x,kind){
+  if(kind==="all") return true;
+  if(kind==="Completed") return x.stage==="Completed";
+  if(kind==="progress") return x.stage==="InProgress"||x.stage==="Ordered";
+  if(kind==="pending") return x.stage!=="Completed"&&x.stage!=="InProgress"&&x.stage!=="Ordered";
+  return true;
+}
+function openFilter(kind){
+  const titles={all:"All tasks",Completed:"Completed tasks",progress:"In progress / ordered",pending:"Pending tasks"};
+  const list=state.tasks.filter(x=>matchKind(x,kind)).sort((a,b)=> a.segment.localeCompare(b.segment) || prio(a)-prio(b) || a.task.localeCompare(b.task));
+  document.getElementById("filterTitle").textContent=(titles[kind]||"Tasks")+" ("+list.length+")";
+  let html="";
+  if(!list.length) html=`<div class="log-empty">No tasks here yet.</div>`;
+  for(const x of list){
+    html+=`<div class="flt" onclick="closeModal('filterOverlay');openTask('${x.id}')">
+      <div><span class="pill pr${prio(x)}">${prio(x)}</span> <b>${esc(x.task)}</b><span class="flt-seg">${esc(x.segment)}</span></div>
+      <span class="badge st-${x.stage}">${STAGE_LABELS[x.stage]||esc(x.stage)}</span>
+    </div>`;
+  }
+  document.getElementById("filterList").innerHTML=html;
+  document.getElementById("filterOverlay").classList.add("show");
+}
 
 /* =====================================================
    RENDER
@@ -636,12 +725,12 @@ function renderOverview(){
   const pctDone=total?Math.round(done/total*100):0, pctProg=total?Math.round(prog/total*100):0;
 
   let html=`<div class="kpis">
-    <div class="kpi"><div class="num">${total}</div><div class="lbl">Total tasks</div></div>
-    <div class="kpi"><div class="num" style="color:var(--green)">${done}</div><div class="lbl">Completed</div></div>
-    <div class="kpi"><div class="num" style="color:var(--amber)">${prog}</div><div class="lbl">In progress / ordered</div></div>
-    <div class="kpi"><div class="num" style="color:var(--accent)">${pending}</div><div class="lbl">Pending</div></div>
-    <div class="kpi"><div class="num">${inr(cost)}</div><div class="lbl">Total est. cost</div></div>
-    <div class="kpi"><div class="num" style="color:var(--green)">${inr(spent)}</div><div class="lbl">Cost of completed</div></div>
+    <div class="kpi kpi-click" onclick="openFilter('all')" title="View all tasks"><div class="num">${total}</div><div class="lbl">Total tasks</div></div>
+    <div class="kpi kpi-click" onclick="openFilter('Completed')" title="View completed tasks"><div class="num" style="color:var(--green)">${done}</div><div class="lbl">Completed</div></div>
+    <div class="kpi kpi-click" onclick="openFilter('progress')" title="View in progress / ordered"><div class="num" style="color:var(--amber)">${prog}</div><div class="lbl">In progress / ordered</div></div>
+    <div class="kpi kpi-click" onclick="openFilter('pending')" title="View pending tasks"><div class="num" style="color:var(--accent)">${pending}</div><div class="lbl">Pending</div></div>
+    <div class="kpi" title="Sum of estimated / actual cost across all tasks"><div class="num">${inr(cost)}</div><div class="lbl">Total est. cost</div></div>
+    <div class="kpi" title="Sum of cost for completed tasks"><div class="num" style="color:var(--green)">${inr(spent)}</div><div class="lbl">Cost of completed</div></div>
   </div>`;
 
   const gEnd=pctDone, aEnd=pctDone+pctProg;
@@ -661,6 +750,14 @@ function renderOverview(){
     <div class="panel" id="calPanel">${calendarHTML()}</div>
   </div>`;
 
+  html+=`<div class="stage-legend">
+    <span><span class="dot" style="background:var(--green)"></span>Completed</span>
+    <span><span class="dot" style="background:var(--amber)"></span>In progress</span>
+    <span><span class="dot" style="background:var(--accent)"></span>Ordered</span>
+    <span><span class="dot" style="background:var(--blue)"></span>Approved</span>
+    <span><span class="dot" style="background:#b8c4cc"></span>Proposed</span>
+    <span><span class="dot" style="background:var(--red)"></span>On hold</span>
+  </div>`;
   html+=`<div class="seg-grid">`;
   for(const s of state.segments){
     const ts=segTasks(s.name);
@@ -669,8 +766,10 @@ function renderOverview(){
     const pct=ts.length?Math.round(d/ts.length*100):0;
     html+=`<div class="seg-card" onclick="switchTab('${esc(s.name).replace(/'/g,"\\'")}')">
       <h3>${esc(s.name)}</h3>
-      <div class="meta"><span>${d}/${ts.length} done · ${pct}%</span><span>${inr(c)}</span></div>
-      <div class="bar"><div style="width:${pct}%"></div></div>
+      <div class="seg-body">
+        <div class="segpie" style="background:${segPie(ts)}"></div>
+        <div class="seg-info"><div>${d}/${ts.length} done · ${pct}%</div><div class="cost2">${inr(c)}</div></div>
+      </div>
     </div>`;
   }
   html+="</div>";
