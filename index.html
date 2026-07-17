@@ -43,6 +43,18 @@
   .login-card button:hover{filter:brightness(1.08);}
   .login-err{color:var(--red); font-size:13px; min-height:18px; margin-bottom:6px;}
   .login-note{font-size:12px; color:var(--muted); margin-top:18px; line-height:1.5;}
+  .login-card .login-link{background:var(--surface2); color:var(--accent); margin-top:9px; font-weight:600;}
+  .userrow{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:9px 10px; background:var(--surface2); border:1px solid var(--border); border-radius:9px; margin-bottom:6px; font-family:sans-serif; font-size:13px; flex-wrap:wrap;}
+  .uinfo{display:flex; flex-direction:column;}
+  .umail{color:var(--muted); font-size:11.5px;}
+  .uctl{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .uctl select{padding:5px 8px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text);}
+  .ustatus{font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; padding:2px 7px; border-radius:999px; font-weight:700;}
+  .us-pending{background:var(--amber-soft); color:var(--amber);}
+  .us-approved{background:var(--green-soft); color:var(--green);}
+  .us-rejected{background:var(--red-soft); color:var(--red);}
+  .miniok{background:var(--green); color:#fff; border:none; border-radius:7px; padding:5px 10px; cursor:pointer; font-size:12px;}
+  .minino{background:var(--surface); border:1px solid var(--border); color:var(--red); border-radius:7px; padding:5px 10px; cursor:pointer; font-size:12px;}
   .login-status{font-size:12px;color:var(--muted);margin-top:14px;}
 
   header{background:var(--surface); border-bottom:1px solid var(--border); padding:14px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; position:sticky; top:0; z-index:20;}
@@ -364,7 +376,13 @@
     <input type="email" id="loginEmail" placeholder="Enter your email address" onkeydown="if(event.key==='Enter')doLogin()">
     <div class="login-err" id="loginErr"></div>
     <button onclick="doLogin()">Sign in</button>
-    <div class="login-note">Admins add &amp; update tasks. Everyone can post updates to a task's log. View-only otherwise.</div>
+    <button type="button" class="login-link" onclick="showRequest()">Request access</button>
+    <div id="reqBox" style="display:none; margin-top:10px">
+      <input id="reqName" placeholder="Your full name" onkeydown="if(event.key==='Enter')sendRequest()">
+      <button type="button" onclick="sendRequest()">Send access request</button>
+      <div id="reqMsg" style="font-size:12px; color:var(--muted); margin-top:8px"></div>
+    </div>
+    <div class="login-note">Access is by approval. The centre admin grants <b>Read-only</b>, <b>Read/Write</b> or <b>Admin</b> access. New here? Enter your email, then click <b>Request access</b>.</div>
     <div class="login-status" id="loginStatus"></div>
   </div>
 </div>
@@ -383,7 +401,7 @@
   <div class="userchip"><span id="userEmailChip"></span><span class="role-badge" id="roleBadge"></span></div>
   <label class="switch" title="Toggle dark / light mode"><input type="checkbox" id="themeToggle" onchange="toggleTheme()"><span class="slider"></span></label>
   <button class="iconbtn" id="refreshBtn" onclick="manualRefresh()" title="Reload latest from the sheet">↻ Refresh</button>
-  <button class="iconbtn" id="adminPanelBtn" onclick="openAdminPanel()" style="display:none">⚙️ Admins</button>
+  <button class="iconbtn" id="adminPanelBtn" onclick="openUsers()" style="display:none">👥 Users</button>
   <button class="iconbtn" onclick="exportCSV()" title="Export all tasks as CSV">CSV</button>
   <button class="iconbtn" onclick="logout()">Logout</button>
 </header>
@@ -426,13 +444,13 @@
     <h3 id="logTitle">Comments</h3>
     <div class="log-sub" id="logSub"></div>
     <div class="log-list" id="logList"></div>
-    <div class="addcmt">
+    <div class="addcmt" id="logAddRow">
       <label>Add a comment / status update</label>
       <textarea id="logComment" placeholder="Type an update…" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey))addComment()"></textarea>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeModal('logOverlay')">Close</button>
-        <button class="btn-primary" onclick="addComment()">Add comment</button>
-      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('logOverlay')">Close</button>
+      <button class="btn-primary" id="logAddBtn" onclick="addComment()">Add comment</button>
     </div>
   </div>
 </div>
@@ -481,16 +499,12 @@
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
+<!-- USERS & ACCESS PANEL -->
 <div class="overlay" id="adminOverlay">
   <div class="modal">
-    <h3>Admin access</h3>
-    <p style="font-size:13px;color:var(--muted);font-family:sans-serif;margin:6px 0 10px">These emails can add and update tasks. The super admin (jtccoreteam@gmail.com) can also edit/delete log entries.</p>
-    <ul class="admin-list" id="adminList"></ul>
-    <div style="display:flex;gap:8px">
-      <input id="newAdminEmail" placeholder="email@example.com" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text)">
-      <button class="btn-primary" onclick="addAdmin()">Add</button>
-    </div>
+    <h3>Users &amp; access</h3>
+    <p style="font-size:13px;color:var(--muted);font-family:sans-serif;margin:6px 0 12px">Approve requests and set each person's access level. Only the super admin can change these — and each change emails the person automatically.</p>
+    <div id="usersList"></div>
     <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('adminOverlay')">Close</button></div>
   </div>
 </div>
@@ -522,6 +536,7 @@ const SEED = {
   logs: [],
   people: {},
   files: [],
+  users: [{email:"getdeepakdeshpande@gmail.com",name:"",role:"admin",status:"approved"},{email:SUPER_ADMIN,name:"",role:"admin",status:"approved"}],
   segments: [
     {name:"Dhamma Hall", note:""},
     {name:"Mini Dhamma Hall", note:"The mini Dhamma Hall was inspected and has a sitting capacity of 30–40 students."},
@@ -547,7 +562,7 @@ const SEED = {
    STATE
    ===================================================== */
 const LS_DATA="jtc_dashboard_data", LS_THEME="jtc_theme", LS_USER="jtc_user";
-let state={segments:[],tasks:[],admins:[],logs:[],people:{},files:[],superAdmin:SUPER_ADMIN};
+let state={segments:[],tasks:[],admins:[],logs:[],people:{},files:[],users:[],superAdmin:SUPER_ADMIN};
 let currentTab="Overview", currentUser=null, editingId=null, searchQ="", currentLogTask=null, currentFileTask=null, currentDetailTask=null;
 let sortKey="priority", sortDir=1;
 let calYear, calMonth, calSelected=null;
@@ -579,6 +594,7 @@ function applyServer(d){
     logs:Array.isArray(d.logs)?d.logs:[],
     people:(d.people&&typeof d.people==="object")?d.people:{},
     files:Array.isArray(d.files)?d.files:[],
+    users:Array.isArray(d.users)?d.users:[],
     superAdmin:d.superAdmin||SUPER_ADMIN
   };
   saveCache(); return true;
@@ -606,13 +622,32 @@ function loadCache(){
 }
 function normalize(d){
   d.logs=Array.isArray(d.logs)?d.logs:[]; d.admins=d.admins||[...DEFAULT_ADMINS];
-  d.people=(d.people&&typeof d.people==="object")?d.people:{}; d.files=Array.isArray(d.files)?d.files:[];
+  d.people=(d.people&&typeof d.people==="object")?d.people:{}; d.files=Array.isArray(d.files)?d.files:[]; d.users=Array.isArray(d.users)?d.users:[];
   d.superAdmin=d.superAdmin||SUPER_ADMIN; d.segments=d.segments||[]; d.tasks=d.tasks||[];
   return d;
 }
 function getAdmins(){ return (state.admins&&state.admins.length)?state.admins:[...DEFAULT_ADMINS]; }
-function isAdmin(){ return currentUser && getAdmins().map(a=>a.toLowerCase()).includes(currentUser.toLowerCase()); }
-function isSuper(){ return currentUser && currentUser.toLowerCase()===(state.superAdmin||SUPER_ADMIN).toLowerCase(); }
+function userRec(email){ if(!email) return null; email=String(email).toLowerCase(); return (state.users||[]).find(u=>u.email===email)||null; }
+function isCoreAdmin(e){ return DEFAULT_ADMINS.map(a=>a.toLowerCase()).includes(String(e).toLowerCase()); }
+function accessStatus(email){
+  if(!email) return "none";
+  const e=String(email).toLowerCase();
+  if(e===(state.superAdmin||SUPER_ADMIN).toLowerCase()) return "super";
+  if(isCoreAdmin(e)) return "approved";
+  const u=userRec(e); return u ? (u.status||"pending") : "none";
+}
+function roleOf(email){
+  if(!email) return null;
+  const e=String(email).toLowerCase();
+  if(e===(state.superAdmin||SUPER_ADMIN).toLowerCase()) return "super";
+  if(isCoreAdmin(e)) return "admin";               // core team always retains access
+  const u=userRec(e); return (u && u.status==="approved") ? (u.role||"viewer") : null;
+}
+function currentRole(){ return roleOf(currentUser); }
+function hasAccess(){ return currentRole()!==null; }
+function isSuper(){ return currentRole()==="super"; }
+function isAdmin(){ const r=currentRole(); return r==="super"||r==="admin"; }
+function isEditor(){ const r=currentRole(); return r==="super"||r==="admin"||r==="editor"; }
 
 /* =====================================================
    AUTH
@@ -620,8 +655,13 @@ function isSuper(){ return currentUser && currentUser.toLowerCase()===(state.sup
 function doLogin(){
   const em=document.getElementById("loginEmail").value.trim().toLowerCase();
   const err=document.getElementById("loginErr");
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ err.textContent="Please enter a valid email address."; return; }
-  err.textContent=""; currentUser=em; localStorage.setItem(LS_USER,em); enterApp();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ err.style.color="var(--red)"; err.textContent="Please enter a valid email address."; return; }
+  const st=accessStatus(em);
+  if(st==="super"||st==="approved"){ err.textContent=""; currentUser=em; localStorage.setItem(LS_USER,em); enterApp(); return; }
+  currentUser=null; localStorage.removeItem(LS_USER);
+  if(st==="pending"){ err.style.color="var(--amber)"; err.textContent="Your access request is pending approval."; }
+  else if(st==="rejected"){ err.style.color="var(--red)"; err.textContent="Access was declined. Please contact "+(state.superAdmin||SUPER_ADMIN)+"."; }
+  else { err.style.color="var(--muted)"; err.textContent="This email doesn't have access yet — request it below."; showRequest(); }
 }
 function logout(){
   localStorage.removeItem(LS_USER); currentUser=null;
@@ -629,15 +669,31 @@ function logout(){
   document.getElementById("loginScreen").style.display="flex";
   document.getElementById("loginEmail").value="";
 }
+function showRequest(){
+  document.getElementById("reqBox").style.display="block";
+  setTimeout(()=>{ const n=document.getElementById("reqName"); if(n) n.focus(); },30);
+}
+function sendRequest(){
+  const em=document.getElementById("loginEmail").value.trim().toLowerCase();
+  const nm=document.getElementById("reqName").value.trim();
+  const msg=document.getElementById("reqMsg");
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ msg.style.color="var(--red)"; msg.textContent="Enter your email in the box above first."; return; }
+  if(!nm){ msg.style.color="var(--red)"; msg.textContent="Please enter your name."; return; }
+  if(!API_LIVE){ msg.style.color="var(--red)"; msg.textContent="Not connected to the sheet."; return; }
+  msg.style.color="var(--muted)"; msg.textContent="Sending…";
+  apiWrite({action:"requestAccess", email:em, name:nm})
+    .then(()=>{ msg.style.color="var(--green)"; msg.textContent="✓ Request sent. You'll get an email once it's approved."; })
+    .catch(()=>{ msg.style.color="var(--green)"; msg.textContent="✓ Request sent. You'll be emailed once approved."; });
+}
 function enterApp(){
   document.getElementById("loginScreen").style.display="none";
   document.getElementById("app").style.display="block";
   document.getElementById("userEmailChip").textContent=currentUser;
   const rb=document.getElementById("roleBadge");
-  if(isSuper()){ rb.textContent="SUPER ADMIN"; rb.className="role-badge role-super"; }
-  else if(isAdmin()){ rb.textContent="ADMIN"; rb.className="role-badge role-admin"; }
-  else { rb.textContent="VIEWER"; rb.className="role-badge role-viewer"; }
-  document.getElementById("adminPanelBtn").style.display=isAdmin()?"":"none";
+  const r=currentRole();
+  const bd={super:["SUPER ADMIN","role-super"],admin:["ADMIN","role-admin"],editor:["READ / WRITE","role-admin"],viewer:["READ-ONLY","role-viewer"]}[r]||["VIEWER","role-viewer"];
+  rb.textContent=bd[0]; rb.className="role-badge "+bd[1];
+  document.getElementById("adminPanelBtn").style.display=isSuper()?"":"none";
   const dot=document.getElementById("liveDot"), lt=document.getElementById("liveText");
   if(API_LIVE){ dot.className="livedot"; lt.textContent="Live · synced to Google Sheet"; }
   else{ dot.className="livedot off"; lt.textContent="Offline demo — not connected yet"; }
@@ -848,7 +904,7 @@ function renderSegment(name){
   const totalCost=ts.reduce((a,x)=>a+(Number(x.cost)||0),0);
   if(searchQ){ const q=searchQ.toLowerCase(); ts=ts.filter(x=>(x.task+" "+x.owner+" "+x.details+" "+x.stage).toLowerCase().includes(q)); }
   ts=sortTasks(ts);
-  const admin=isAdmin();
+  const admin=isEditor();
   const sn=esc(name).replace(/'/g,"\\'");
   let html=`<div class="seg-head">
     <h2>${esc(name)}</h2>
@@ -906,7 +962,7 @@ function fillModalSelects(){
   document.getElementById("f_priority").innerHTML=[1,2,3,4,5].map(p=>`<option value="${p}">${PRIORITY_LABELS[p]}</option>`).join("");
 }
 function openAddTask(segName){
-  if(!isAdmin()) return;
+  if(!isEditor()) return;
   editingId=null; fillModalSelects();
   document.getElementById("taskModalTitle").textContent="Add Task";
   document.getElementById("deleteTaskBtn").style.display="none";
@@ -916,11 +972,11 @@ function openAddTask(segName){
   document.getElementById("taskOverlay").classList.add("show");
 }
 function openEditTask(id){
-  if(!isAdmin()) return;
+  if(!isEditor()) return;
   const x=state.tasks.find(t=>t.id===id); if(!x) return;
   editingId=id; fillModalSelects();
   document.getElementById("taskModalTitle").textContent="Edit Task";
-  document.getElementById("deleteTaskBtn").style.display="";
+  document.getElementById("deleteTaskBtn").style.display=isAdmin()?"":"none";
   f_task.value=x.task; f_segment.value=x.segment; f_owner.value=x.owner;
   f_stage.value=x.stage; f_priority.value=String(prio(x)); f_proposed.value=x.proposed; f_due.value=x.due;
   f_cost.value=x.cost||""; f_quantity.value=(x.quantity===0||x.quantity)?x.quantity:""; f_details.value=x.details||"";
@@ -966,9 +1022,12 @@ function renderLog(){
     </div>`;
   }
   document.getElementById("logList").innerHTML=html;
+  const canEdit=isEditor();
+  document.getElementById("logAddRow").style.display=canEdit?"":"none";
+  document.getElementById("logAddBtn").style.display=canEdit?"":"none";
 }
 function addComment(){
-  if(!currentUser){ toast("Please sign in"); return; }
+  if(!isEditor()){ toast("Read-only access — you can't post comments"); return; }
   const ta=document.getElementById("logComment"); const c=ta.value.trim();
   if(!c){ toast("Type a comment first"); return; }
   const entry={logId:"l"+Date.now().toString(36)+Math.random().toString(36).slice(2,5), taskId:currentLogTask, ts:new Date().toISOString().slice(0,16).replace("T"," "), user:currentUser, comment:c};
@@ -998,7 +1057,7 @@ function renderFiles(){
   const x=state.tasks.find(t=>t.id===currentFileTask); if(!x) return;
   document.getElementById("fileTitle").textContent="📎 "+x.task;
   document.getElementById("fileSub").textContent=x.segment;
-  const items=filesFor(currentFileTask); const admin=isAdmin();
+  const items=filesFor(currentFileTask); const admin=isEditor();
   let html="";
   if(!items.length) html=`<div class="log-empty">No files yet.${admin?" Use the button below to attach layouts, quotations or invoices.":""}</div>`;
   for(const f of items){
@@ -1014,6 +1073,7 @@ function renderFiles(){
 function readAsDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
 async function filesSelected(ev){
   const files=[...ev.target.files]; ev.target.value=""; if(!files.length) return;
+  if(!isEditor()){ toast("Read-only access — you can't upload files"); return; }
   if(!API_LIVE){ toast("Connect to the sheet to upload files"); return; }
   const task=currentFileTask;
   for(const f of files){
@@ -1086,7 +1146,7 @@ function renderDetail(){
   for(const f of files) html+=`<div class="dt-v" style="padding:3px 0"><a href="${esc(f.url)}" target="_blank" rel="noopener">📎 ${esc(f.fileName)} ↗</a></div>`;
   html+=`</div>`;
   document.getElementById("dtBody").innerHTML=html;
-  const admin=isAdmin();
+  const admin=isEditor();
   document.getElementById("dtActions").innerHTML=
     `<button class="btn-secondary" onclick="closeModal('detailOverlay')">Close</button>`+
     `<button class="btn-secondary" onclick="closeModal('detailOverlay');openFiles('${x.id}')">📎 Files</button>`+
@@ -1097,32 +1157,41 @@ function renderDetail(){
 /* =====================================================
    ADMIN PANEL
    ===================================================== */
-function openAdminPanel(){ if(!isAdmin()) return; renderAdminList(); document.getElementById("adminOverlay").classList.add("show"); }
-function renderAdminList(){
-  const admins=getAdmins();
-  document.getElementById("adminList").innerHTML=admins.map(a=>{
-    const su=a.toLowerCase()===(state.superAdmin||SUPER_ADMIN).toLowerCase();
-    return `<li><span>${esc(a)}${su?' <span class="role-badge role-super" style="margin-left:6px">SUPER</span>':""}</span>${(admins.length>1&&!su)?`<button class="rowbtn" onclick="removeAdmin('${esc(a)}')">🗑️</button>`:""}</li>`;
-  }).join("");
+function openUsers(){ if(!isSuper()) return; renderUsers(); document.getElementById("adminOverlay").classList.add("show"); }
+function renderUsers(){
+  const roleLbl={viewer:"Read-only",editor:"Read/Write",admin:"Admin"};
+  const us=(state.users||[]).slice().sort((a,b)=>{
+    const o={pending:0,approved:1,rejected:2}; return (o[a.status]??3)-(o[b.status]??3) || (a.email||"").localeCompare(b.email||"");
+  });
+  const opts=(r)=>["viewer","editor","admin"].map(o=>`<option value="${o}" ${o===r?"selected":""}>${roleLbl[o]}</option>`).join("");
+  let html="";
+  if(!us.length) html=`<div class="log-empty">No users yet.</div>`;
+  for(const u of us){
+    const sup=u.email===(state.superAdmin||SUPER_ADMIN).toLowerCase();
+    html+=`<div class="userrow">
+      <div class="uinfo"><b>${esc(u.name||u.email)}</b><span class="umail">${esc(u.email)}</span></div>
+      <div class="uctl">
+        <span class="ustatus us-${esc(u.status)}">${esc(u.status)}</span>
+        ${sup?`<span class="role-badge role-super">SUPER</span>`
+             :`<select onchange="changeRole('${esc(u.email)}',this.value)">${opts(u.role)}</select>
+               ${u.status!=="approved"?`<button class="miniok" onclick="decide('${esc(u.email)}','approved')">Approve</button>`:""}
+               ${u.status==="rejected"?"":`<button class="minino" onclick="decide('${esc(u.email)}','rejected')">${u.status==="approved"?"Revoke":"Reject"}</button>`}`}
+      </div>
+    </div>`;
+  }
+  document.getElementById("usersList").innerHTML=html;
 }
-function addAdmin(){
-  const em=document.getElementById("newAdminEmail").value.trim().toLowerCase();
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ toast("Invalid email"); return; }
-  const a=getAdmins().slice(); if(!a.includes(em)) a.push(em);
-  state.admins=a; document.getElementById("newAdminEmail").value=""; renderAdminList(); toast("Admin added");
-  persist({action:"setAdmins", admins:a}, null, renderAdminList);
+function changeRole(email, role){
+  if(!isSuper()) return;
+  const u=userRec(email); if(u) u.role=role;
+  toast("Access level updated");
+  persist({action:"setUserAccess", actor:currentUser, email:email, role:role}, null, renderUsers);
 }
-function removeAdmin(em){
-  let a=getAdmins().filter(x=>x!==em);
-  if(!a.length){ toast("At least one admin required"); return; }
-  state.admins=a; renderAdminList(); toast("Admin removed");
-  persist({action:"setAdmins", admins:a}, ()=>{
-    const rb=document.getElementById("roleBadge");
-    if(isSuper()){ rb.textContent="SUPER ADMIN"; rb.className="role-badge role-super"; }
-    else if(isAdmin()){ rb.textContent="ADMIN"; rb.className="role-badge role-admin"; }
-    else { rb.textContent="VIEWER"; rb.className="role-badge role-viewer"; }
-    document.getElementById("adminPanelBtn").style.display=isAdmin()?"":"none";
-  }, renderAdminList);
+function decide(email, status){
+  if(!isSuper()) return;
+  const u=userRec(email); if(u) u.status=status;
+  toast(status==="approved"?"Approved — the user has been emailed":"Updated — the user has been emailed");
+  persist({action:"setUserAccess", actor:currentUser, email:email, status:status}, null, renderUsers);
 }
 
 /* =====================================================
@@ -1153,7 +1222,7 @@ function exportCSV(){
     catch(e){ state=loadCache(); ls.textContent="⚠️ Couldn't reach the sheet — showing last saved data."; }
   }else{ state=loadCache(); ls.textContent="Demo mode (not connected)."; }
   const savedUser=localStorage.getItem(LS_USER);
-  if(savedUser){ currentUser=savedUser; enterApp(); }
+  if(savedUser){ currentUser=savedUser; if(hasAccess()) enterApp(); else { currentUser=null; localStorage.removeItem(LS_USER); } }
 })();
 </script>
 </body>
