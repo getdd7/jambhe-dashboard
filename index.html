@@ -167,7 +167,14 @@
   .statustag{background:var(--gold); color:#fff; border-radius:6px; padding:1px 7px; font-size:10.5px; font-weight:700; margin-right:5px; white-space:nowrap;}
   .chips{display:flex; flex-wrap:wrap; gap:4px;}
   .chip{background:var(--blue-soft); color:var(--blue); border-radius:999px; padding:2px 9px; font-size:11.5px; font-weight:600; white-space:nowrap;}
-  .chip.tba{background:var(--grey-soft); color:var(--muted);}
+  .chip{cursor:pointer;}
+  .chip.tba{background:var(--grey-soft); color:var(--muted); cursor:default;}
+  .chip.leader{background:var(--red-soft); color:var(--red); font-weight:700;}
+  .chip.leader::before{content:"★ "; font-size:10px;}
+  .grp{margin-bottom:22px;}
+  .grp-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px;}
+  .grp-head h3{font-size:17px;}
+  .grp-head span{font-size:12.5px; color:var(--muted); font-family:sans-serif;}
   .tasklink{cursor:pointer; border-bottom:1px dotted var(--muted);}
   .tasklink:hover{color:var(--accent); border-bottom-color:var(--accent);}
   .dt-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-bottom:12px; font-family:sans-serif;}
@@ -420,6 +427,7 @@
     <h3 id="taskModalTitle">Add Task</h3>
     <div style="height:8px"></div>
     <div class="field"><label>Task *</label><input id="f_task"></div>
+    <div class="field"><label>Category <span class="hint">— groups common items across segments for ordering</span></label><input id="f_category" list="catList" placeholder="e.g. AV / Sound, Furniture, Electrical"><datalist id="catList"></datalist></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="field"><label>Segment</label><select id="f_segment"></select></div>
       <div class="field"><label>Priority</label><select id="f_priority"></select></div>
@@ -491,6 +499,16 @@
   </div>
 </div>
 
+<!-- CONTACT MODAL -->
+<div class="overlay" id="contactOverlay">
+  <div class="modal" style="width:min(400px,94vw)">
+    <h3 id="contactTitle">Contact</h3>
+    <div style="height:8px"></div>
+    <div id="contactBody"></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('contactOverlay')">Close</button></div>
+  </div>
+</div>
+
 <!-- FILTER (KPI) MODAL -->
 <div class="overlay" id="filterOverlay">
   <div class="modal">
@@ -530,7 +548,7 @@ const PRIORITY_LABELS = {1:"1 · Highest",2:"2 · High",3:"3 · Medium",4:"4 · 
    SEED (offline fallback)
    ===================================================== */
 function t(segment, task, proposed, details){
-  return {id:"s"+Math.random().toString(36).slice(2,10), segment, task, quantity:"", owner:"TBA", stage:"Proposed", priority:3, proposed:proposed||"", due:"", cost:0, details:details||""};
+  return {id:"s"+Math.random().toString(36).slice(2,10), segment, task, category:"", quantity:"", owner:"TBA", stage:"Proposed", priority:3, proposed:proposed||"", due:"", cost:0, details:details||""};
 }
 const SEED = {
   superAdmin: SUPER_ADMIN,
@@ -747,6 +765,27 @@ function toast(msg){ const el=document.getElementById("toast"); el.textContent=m
 function segTasks(name){ return state.tasks.filter(x=>x.segment===name); }
 function prio(x){ const p=Number(x.priority); return (p>=1&&p<=5)?p:3; }
 function ownersOf(x){ return String(x.owner||"").split(/[,;]/).map(s=>s.trim()).filter(Boolean); }
+function ownerChips(owners){
+  if(!owners.length) return `<span class="chip tba">TBA</span>`;
+  return owners.map((o,i)=>{
+    const tba=o.toLowerCase()==="tba"; const cls=tba?"tba":(i===0?"leader":"");
+    return `<span class="chip ${cls}" onclick="event.stopPropagation();openContact('${esc(o).replace(/'/g,"\\'")}')" title="${(i===0&&!tba)?'Team leader — ':''}view contact">${esc(o)}</span>`;
+  }).join("");
+}
+function openContact(name){
+  const key=String(name||"").trim().toLowerCase();
+  if(!key||key==="tba"){ toast("No owner assigned yet"); return; }
+  const u=(state.users||[]).find(x=>String(x.name||"").trim().toLowerCase()===key);
+  document.getElementById("contactTitle").textContent=name;
+  const c=document.getElementById("contactBody");
+  if(u){
+    c.innerHTML=`<div class="dt-block"><span class="dt-l">Email</span><div class="dt-v">${u.email?`<a href="mailto:${esc(u.email)}">${esc(u.email)}</a>`:"—"}</div></div>
+      <div class="dt-block"><span class="dt-l">Phone</span><div class="dt-v">${u.phone?`<a href="tel:${esc(String(u.phone).replace(/\s/g,''))}">${esc(u.phone)}</a>`:"—"}</div></div>`;
+  } else {
+    c.innerHTML=`<div class="dt-v" style="color:var(--muted)">No saved contact for “${esc(name)}”. Contacts come from registered users — the super admin can add their phone in 👥 Users, or the person can sign in and add it.</div>`;
+  }
+  document.getElementById("contactOverlay").classList.add("show");
+}
 function qtyDisp(x){ return (x.quantity===0||x.quantity)&&String(x.quantity)!=="" ? esc(String(x.quantity)) : "—"; }
 function logsFor(taskId){ return state.logs.filter(l=>l.taskId===taskId).sort((a,b)=> (String(a.ts)<String(b.ts)?1:-1)); }
 function latestLog(taskId){ const l=logsFor(taskId); return l.length?l[0]:null; }
@@ -792,10 +831,11 @@ function openFilter(kind){
 /* =====================================================
    RENDER
    ===================================================== */
-function render(){ renderTabs(); if(currentTab==="Overview") renderOverview(); else renderSegment(currentTab); }
+function render(){ renderTabs(); if(currentTab==="Overview") renderOverview(); else if(currentTab==="Groups") renderGroups(); else renderSegment(currentTab); }
 function renderTabs(){
   const el=document.getElementById("tabs");
   let html=`<button class="tab ${currentTab==="Overview"?"active":""}" onclick="switchTab('Overview')">📊 Overview</button>`;
+  html+=`<button class="tab ${currentTab==="Groups"?"active":""}" onclick="switchTab('Groups')">🧺 Order Groups</button>`;
   for(const s of state.segments){
     const n=segTasks(s.name).length;
     html+=`<button class="tab ${currentTab===s.name?"active":""}" onclick="switchTab('${esc(s.name).replace(/'/g,"\\'")}')">${esc(s.name)}<span class="cnt">${n}</span></button>`;
@@ -862,6 +902,41 @@ function renderOverview(){
     </div>`;
   }
   html+="</div>";
+  document.getElementById("content").innerHTML=html;
+}
+
+/* ---- order groups (by category, across segments) ---- */
+function renderGroups(){
+  const groups={};
+  for(const x of state.tasks){ const c=(x.category&&String(x.category).trim())?String(x.category).trim():"Uncategorised"; (groups[c]=groups[c]||[]).push(x); }
+  const names=Object.keys(groups).sort((a,b)=> a==="Uncategorised"?1:(b==="Uncategorised"?-1:a.localeCompare(b)));
+  let html=`<div class="seg-head"><h2>🧺 Order Groups</h2><span class="totals">Common items grouped by category across every segment — ready to send to a vendor</span></div>`;
+  if(!state.tasks.length){ document.getElementById("content").innerHTML=html+`<div class="seg-note">No tasks yet.</div>`; return; }
+  const uncatN=(groups["Uncategorised"]||[]).length;
+  if(uncatN) html+=`<div class="seg-note">ℹ️ ${uncatN} item(s) have no category yet. Open a task (✏️) and set a <b>Category</b> like “AV / Sound” to club it with related items here.</div>`;
+  const admin=isEditor();
+  for(const c of names){
+    const items=groups[c].slice().sort((a,b)=> a.task.localeCompare(b.task));
+    const totalCost=items.reduce((a,x)=>a+(Number(x.cost)||0),0);
+    const done=items.filter(x=>x.stage==="Completed").length;
+    html+=`<div class="grp">
+      <div class="grp-head"><h3>${esc(c)}</h3><span>${items.length} item(s) · ${done} done · total ${inr(totalCost)}</span></div>
+      <div class="tablewrap"><table><thead><tr>
+        <th>Task</th><th>Segment</th><th style="text-align:center">Qty</th><th>Owner(s)</th><th>Stage</th><th style="text-align:right">Cost (₹)</th>${admin?"<th></th>":""}
+      </tr></thead><tbody>`;
+    for(const x of items){
+      html+=`<tr>
+        <td class="taskname"><span class="tasklink" onclick="openTask('${x.id}')">${esc(x.task)}</span></td>
+        <td>${esc(x.segment)}</td>
+        <td class="qty">${qtyDisp(x)}</td>
+        <td><div class="chips">${ownerChips(ownersOf(x))}</div></td>
+        <td><span class="badge st-${x.stage}">${STAGE_LABELS[x.stage]||esc(x.stage)}</span></td>
+        <td class="cost">${inr(x.cost)}</td>
+        ${admin?`<td><button class="rowbtn" title="Edit" onclick="openEditTask('${x.id}')">✏️</button></td>`:""}
+      </tr>`;
+    }
+    html+=`</tbody><tfoot><tr><td colspan="5">Group total</td><td class="cost">${inr(totalCost)}</td>${admin?"<td></td>":""}</tr></tfoot></table></div></div>`;
+  }
   document.getElementById("content").innerHTML=html;
 }
 
@@ -966,7 +1041,7 @@ function renderSegment(name){
   for(const x of ts){
     const p=prio(x);
     const owners=ownersOf(x);
-    const chips = owners.length ? `<div class="chips">${owners.map(o=>`<span class="chip ${o.toLowerCase()==="tba"?"tba":""}">${esc(o)}</span>`).join("")}</div>` : `<span class="chip tba">TBA</span>`;
+    const chips = `<div class="chips">${ownerChips(owners)}</div>`;
     const ll=latestStatus(x.id);
     const statusCell = ll ? `<div class="cmt">${esc(ll.text)}</div><div class="meta">${esc(nameOf(ll.user))} · ${esc(fmtTs(ll.ts))}</div>` : `<span class="none">—</span>`;
     const nLogs=logsFor(x.id).length, nFiles=filesFor(x.id).length;
@@ -995,13 +1070,15 @@ function fillModalSelects(){
   document.getElementById("f_segment").innerHTML=state.segments.map(s=>`<option>${esc(s.name)}</option>`).join("");
   document.getElementById("f_stage").innerHTML=STAGES.map(s=>`<option value="${s}">${STAGE_LABELS[s]}</option>`).join("");
   document.getElementById("f_priority").innerHTML=[1,2,3,4,5].map(p=>`<option value="${p}">${PRIORITY_LABELS[p]}</option>`).join("");
+  const cats=[...new Set(state.tasks.map(t=>String(t.category||"").trim()).filter(Boolean))].sort();
+  document.getElementById("catList").innerHTML=cats.map(c=>`<option value="${esc(c)}"></option>`).join("");
 }
 function openAddTask(segName){
   if(!isEditor()) return;
   editingId=null; fillModalSelects();
   document.getElementById("taskModalTitle").textContent="Add Task";
   document.getElementById("deleteTaskBtn").style.display="none";
-  f_task.value=""; f_owner.value="TBA"; f_details.value=""; f_cost.value=""; f_quantity.value="";
+  f_task.value=""; f_owner.value="TBA"; f_details.value=""; f_cost.value=""; f_quantity.value=""; f_category.value="";
   f_proposed.value=new Date().toISOString().slice(0,10); f_due.value="";
   f_segment.value=segName; f_stage.value="Proposed"; f_priority.value="3";
   document.getElementById("taskOverlay").classList.add("show");
@@ -1014,13 +1091,13 @@ function openEditTask(id){
   document.getElementById("deleteTaskBtn").style.display=isAdmin()?"":"none";
   f_task.value=x.task; f_segment.value=x.segment; f_owner.value=x.owner;
   f_stage.value=x.stage; f_priority.value=String(prio(x)); f_proposed.value=x.proposed; f_due.value=x.due;
-  f_cost.value=x.cost||""; f_quantity.value=(x.quantity===0||x.quantity)?x.quantity:""; f_details.value=x.details||"";
+  f_cost.value=x.cost||""; f_quantity.value=(x.quantity===0||x.quantity)?x.quantity:""; f_details.value=x.details||""; f_category.value=x.category||"";
   document.getElementById("taskOverlay").classList.add("show");
 }
 function saveTask(){
   const name=f_task.value.trim();
   if(!name){ toast("Task name is required"); return; }
-  const data={task:name, segment:f_segment.value, owner:f_owner.value.trim()||"TBA", stage:f_stage.value,
+  const data={task:name, segment:f_segment.value, category:f_category.value.trim(), owner:f_owner.value.trim()||"TBA", stage:f_stage.value,
     priority:Number(f_priority.value)||3, quantity:(f_quantity.value===""?"":Number(f_quantity.value)),
     proposed:f_proposed.value, due:f_due.value, cost:Number(f_cost.value)||0, details:f_details.value.trim()};
   let saved;
@@ -1159,7 +1236,7 @@ function openTask(id){ currentDetailTask=id; renderDetail(); document.getElement
 function renderDetail(){
   const x=state.tasks.find(t=>t.id===currentDetailTask); if(!x) return;
   const p=prio(x); const owners=ownersOf(x);
-  const chips = owners.length ? owners.map(o=>`<span class="chip ${o.toLowerCase()==="tba"?"tba":""}">${esc(o)}</span>`).join("") : `<span class="chip tba">TBA</span>`;
+  const chips = ownerChips(owners);
   const ll=latestStatus(x.id); const comments=logsFor(x.id); const files=filesFor(x.id);
   document.getElementById("dtTitle").textContent=x.task;
   let html=`<div class="dt-grid">
@@ -1236,12 +1313,12 @@ function decide(email, status){
    ===================================================== */
 function download(filename, text, type){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=filename; a.click(); URL.revokeObjectURL(a.href); }
 function exportCSV(){
-  const rows=[["Segment","Task","Qty","Owners","Stage","Priority","Latest Status","Updated by","Updated at","Proposed","Due","Cost (INR)","Files","Details"]];
+  const rows=[["Segment","Task","Category","Qty","Owners","Stage","Priority","Latest Status","Updated by","Updated at","Proposed","Due","Cost (INR)","Files","Details"]];
   const ordered=state.tasks.slice().sort((a,b)=> prio(a)-prio(b) || a.segment.localeCompare(b.segment));
   for(const x of ordered){
-    const ll=latestLog(x.id);
-    rows.push([x.segment,x.task,(x.quantity??""),ownersOf(x).join(" | "),STAGE_LABELS[x.stage]||x.stage,prio(x),
-      ll?ll.comment:"",ll?nameOf(ll.user):"",ll?fmtTs(ll.ts):"",x.proposed,x.due,x.cost||0,filesFor(x.id).length,x.details]);
+    const ll=latestStatus(x.id);
+    rows.push([x.segment,x.task,x.category||"",(x.quantity??""),ownersOf(x).join(" | "),STAGE_LABELS[x.stage]||x.stage,prio(x),
+      ll?ll.text:"",ll?nameOf(ll.user):"",ll?fmtTs(ll.ts):"",x.proposed,x.due,x.cost||0,filesFor(x.id).length,x.details]);
   }
   const csv=rows.map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
   download("jambhe-centre-tasks.csv","﻿"+csv,"text/csv"); toast("CSV downloaded");
