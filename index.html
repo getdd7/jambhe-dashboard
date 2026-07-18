@@ -50,6 +50,7 @@
   .umail{color:var(--muted); font-size:11.5px;}
   .uctl{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
   .uctl select{padding:5px 8px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text);}
+  .uinp{padding:4px 8px; border:1px solid var(--border); border-radius:7px; background:var(--surface); color:var(--text); font-size:12.5px; margin:2px 0; width:190px; max-width:100%;}
   .ustatus{font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; padding:2px 7px; border-radius:999px; font-weight:700;}
   .us-pending{background:var(--amber-soft); color:var(--amber);}
   .us-approved{background:var(--green-soft); color:var(--green);}
@@ -386,7 +387,7 @@
     <div class="login-err" id="loginErr" style="margin-top:6px"></div>
     <div id="reqBox" style="display:none; margin-top:6px">
       <div id="reqWho" style="font-size:12.5px;color:var(--muted);margin-bottom:10px"></div>
-      <input id="reqPhone" placeholder="Phone number (optional)" onkeydown="if(event.key==='Enter')sendRequest()">
+      <input id="reqPhone" placeholder="Mobile number *" onkeydown="if(event.key==='Enter')sendRequest()">
       <button type="button" onclick="sendRequest()">Request access</button>
       <div id="reqMsg" style="font-size:12px; color:var(--muted); margin-top:8px"></div>
     </div>
@@ -730,6 +731,7 @@ function sendRequest(){
   const ph=document.getElementById("reqPhone").value.trim();
   const msg=document.getElementById("reqMsg");
   if(!em){ msg.style.color="var(--red)"; msg.textContent="Please sign in with Google first."; return; }
+  if(ph.replace(/\D/g,"").length<7){ msg.style.color="var(--red)"; msg.textContent="A valid mobile number is required."; return; }
   if(!API_LIVE){ msg.style.color="var(--red)"; msg.textContent="Not connected to the sheet."; return; }
   msg.style.color="var(--muted)"; msg.textContent="Sending…";
   apiWrite({action:"requestAccess", email:em, name:(p.name||""), phone:ph, token:currentCredential})
@@ -1283,7 +1285,11 @@ function renderUsers(){
   for(const u of us){
     const sup=u.email===(state.superAdmin||SUPER_ADMIN).toLowerCase();
     html+=`<div class="userrow">
-      <div class="uinfo"><b>${esc(u.name||u.email)}</b><span class="umail">${esc(u.email)}${u.phone?" · "+esc(u.phone):""}</span></div>
+      <div class="uinfo">
+        <input class="uinp" value="${esc(u.name||'')}" placeholder="Name" onchange="saveUser('${esc(u.email)}','name',this.value)">
+        <span class="umail">${esc(u.email)}</span>
+        <input class="uinp" value="${esc(u.phone||'')}" placeholder="Mobile number" onchange="saveUser('${esc(u.email)}','phone',this.value)">
+      </div>
       <div class="uctl">
         <span class="ustatus us-${esc(u.status)}">${esc(u.status)}</span>
         ${sup?`<span class="role-badge role-super">SUPER</span>`
@@ -1300,6 +1306,13 @@ function changeRole(email, role){
   const u=userRec(email); if(u) u.role=role;
   toast("Access level updated");
   persist({action:"setUserAccess", actor:currentUser, email:email, role:role}, null, renderUsers);
+}
+function saveUser(email, field, value){
+  if(!isSuper()) return;
+  const u=userRec(email); if(u) u[field]=value;
+  const payload={action:"setUserAccess", actor:currentUser, email:email}; payload[field]=value;
+  toast(field==="phone"?"Mobile saved":"Name saved");
+  persist(payload, null, renderUsers);
 }
 function decide(email, status){
   if(!isSuper()) return;
