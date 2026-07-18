@@ -230,6 +230,10 @@
   .field{margin-bottom:13px;}
   .field label{display:block; font-size:12px; color:var(--muted); font-family:sans-serif; margin-bottom:5px; text-transform:uppercase; letter-spacing:.5px;}
   .field .hint{text-transform:none; letter-spacing:0; font-size:11px;}
+  .ac{position:absolute; left:0; right:0; top:calc(100% + 2px); background:var(--surface); border:1px solid var(--border); border-radius:9px; box-shadow:var(--shadow); z-index:70; max-height:180px; overflow-y:auto; display:none;}
+  .ac.show{display:block;}
+  .ac div{padding:8px 12px; cursor:pointer; font-size:13.5px; font-family:sans-serif;}
+  .ac div:hover,.ac div.sel{background:var(--surface2); color:var(--accent);}
   .field input,.field select,.field textarea{width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:9px; background:var(--surface2); color:var(--text);}
   .field textarea{resize:vertical; min-height:60px;}
   .modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:18px;}
@@ -434,7 +438,9 @@
       <div class="field"><label>Priority</label><select id="f_priority"></select></div>
       <div class="field"><label>Quantity</label><input type="number" id="f_quantity" min="0" step="1" placeholder="e.g. 2"></div>
       <div class="field"><label>Stage</label><select id="f_stage"></select></div>
-      <div class="field" style="grid-column:1 / -1"><label>Owner(s) <span class="hint">— separate multiple with commas</span></label><input id="f_owner" placeholder="e.g. Deepak, Ravi"></div>
+      <div class="field" style="grid-column:1 / -1"><label>Owner(s) <span class="hint">— separate with commas · first name = team leader</span></label>
+        <div style="position:relative"><input id="f_owner" placeholder="e.g. Deepak, Ravi" autocomplete="off" oninput="ownerAutocomplete()" onkeydown="ownerACKey(event)" onblur="setTimeout(()=>document.getElementById('ownerAC').classList.remove('show'),150)"><div id="ownerAC" class="ac"></div></div>
+      </div>
       <div class="field"><label>Proposed date</label><input type="date" id="f_proposed"></div>
       <div class="field"><label>Due date (deadline)</label><input type="date" id="f_due"></div>
     </div>
@@ -788,6 +794,39 @@ function openContact(name){
   }
   document.getElementById("contactOverlay").classList.add("show");
 }
+/* owner name autocomplete (from registered users) */
+let acItems=[], acIndex=-1;
+function ownerNameList(){
+  const s=new Set();
+  (state.users||[]).forEach(u=>{ if(u.name&&u.name.trim()) s.add(u.name.trim()); });
+  (state.tasks||[]).forEach(t=>ownersOf(t).forEach(o=>{ if(o&&o.toLowerCase()!=="tba") s.add(o); }));
+  return [...s].sort((a,b)=>a.localeCompare(b));
+}
+function ownerToken_(inp){ const v=inp.value; const start=v.lastIndexOf(",")+1; return {before:v.slice(0,start), token:v.slice(start).trim()}; }
+function ownerAutocomplete(){
+  const inp=document.getElementById("f_owner"), ac=document.getElementById("ownerAC");
+  const {token}=ownerToken_(inp);
+  if(token.length<1){ ac.classList.remove("show"); acItems=[]; return; }
+  const q=token.toLowerCase();
+  acItems=ownerNameList().filter(n=>n.toLowerCase().includes(q)).slice(0,6);
+  if(!acItems.length){ ac.classList.remove("show"); return; }
+  acIndex=-1;
+  ac.innerHTML=acItems.map((n,i)=>`<div onmousedown="event.preventDefault();ownerPick(${i})">${esc(n)}</div>`).join("");
+  ac.classList.add("show");
+}
+function ownerPick(i){
+  const inp=document.getElementById("f_owner"); const {before}=ownerToken_(inp);
+  inp.value=(before.trim()?before.trim()+" ":"")+acItems[i]+", ";
+  document.getElementById("ownerAC").classList.remove("show"); acItems=[]; acIndex=-1; inp.focus();
+}
+function ownerACKey(e){
+  const ac=document.getElementById("ownerAC"); if(!ac.classList.contains("show")) return;
+  if(e.key==="ArrowDown"){ e.preventDefault(); acIndex=Math.min(acIndex+1,acItems.length-1); acHi_(); }
+  else if(e.key==="ArrowUp"){ e.preventDefault(); acIndex=Math.max(acIndex-1,0); acHi_(); }
+  else if(e.key==="Enter"&&acIndex>=0){ e.preventDefault(); ownerPick(acIndex); }
+  else if(e.key==="Escape"){ ac.classList.remove("show"); }
+}
+function acHi_(){ const ac=document.getElementById("ownerAC"); [...ac.children].forEach((c,i)=>c.classList.toggle("sel",i===acIndex)); }
 function qtyDisp(x){ return (x.quantity===0||x.quantity)&&String(x.quantity)!=="" ? esc(String(x.quantity)) : "—"; }
 function logsFor(taskId){ return state.logs.filter(l=>l.taskId===taskId).sort((a,b)=> (String(a.ts)<String(b.ts)?1:-1)); }
 function latestLog(taskId){ const l=logsFor(taskId); return l.length?l[0]:null; }
