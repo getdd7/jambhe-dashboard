@@ -958,6 +958,7 @@ function renderGroups(){
   let html=`<div class="seg-head"><h2>📂 Categories</h2><span class="totals">Items grouped by category across every segment — ready to send to a vendor</span></div>`;
   if(!state.tasks.length){ document.getElementById("content").innerHTML=html+`<div class="seg-note">No tasks yet.</div>`; return; }
   const uncatN=(groups["Uncategorised"]||[]).length;
+  html+=`<div class="dlbar" style="margin-top:0"><button class="btn-primary" onclick="downloadCategoriesXlsx()">⬇ Download Categories as Excel (with Comments tab)</button></div>`;
   if(uncatN) html+=`<div class="seg-note">ℹ️ ${uncatN} item(s) have no category yet. Open a task (✏️) and set a <b>Category</b> like “AV / Sound” to club it with related items here.</div>`;
   const admin=isEditor();
   for(const c of names){
@@ -982,7 +983,6 @@ function renderGroups(){
     }
     html+=`</tbody><tfoot><tr><td colspan="5">Group total</td><td class="cost">${inr(totalCost)}</td>${admin?"<td></td>":""}</tr></tfoot></table></div></div>`;
   }
-  html+=`<div class="dlbar"><button class="btn-primary" onclick="downloadCategoriesXlsx()">⬇ Download Categories as Excel (with Comments tab)</button></div>`;
   document.getElementById("content").innerHTML=html;
 }
 
@@ -992,6 +992,7 @@ function renderInventory(){
   const totalCost=done.reduce((a,x)=>a+(Number(x.cost)||0),0);
   let html=`<div class="seg-head"><h2>📦 Inventory</h2><span class="totals">Items marked Completed — what's been procured · ${done.length} item(s) · total ${inr(totalCost)}</span></div>`;
   if(!done.length){ document.getElementById("content").innerHTML=html+`<div class="seg-note">Nothing here yet. When a task's stage is set to <b>Completed</b>, it appears here as procured inventory (it also stays in its segment, marked Completed).</div>`; return; }
+  html+=`<div class="dlbar" style="margin-top:0"><button class="btn-primary" onclick="downloadInventoryXlsx()">⬇ Download Inventory as Excel (to share with ATs)</button></div>`;
   const groups={};
   for(const x of done){ const c=(x.category&&String(x.category).trim())?String(x.category).trim():"Uncategorised"; (groups[c]=groups[c]||[]).push(x); }
   const names=Object.keys(groups).sort((a,b)=> a==="Uncategorised"?1:(b==="Uncategorised"?-1:a.localeCompare(b)));
@@ -1003,7 +1004,6 @@ function renderInventory(){
     for(const x of items){ html+=`<tr><td class="taskname"><span class="tasklink" onclick="openTask('${x.id}')">${esc(x.task)}</span></td><td>${esc(x.segment)}</td><td class="qty">${qtyDisp(x)}</td><td><div class="chips">${ownerChips(ownersOf(x))}</div></td><td class="cost">${inr(x.cost)}</td></tr>`; }
     html+=`</tbody><tfoot><tr><td colspan="4">Group total</td><td class="cost">${inr(gt)}</td></tr></tfoot></table></div></div>`;
   }
-  html+=`<div class="dlbar"><button class="btn-primary" onclick="downloadInventoryXlsx()">⬇ Download Inventory as Excel (to share with ATs)</button></div>`;
   document.getElementById("content").innerHTML=html;
 }
 
