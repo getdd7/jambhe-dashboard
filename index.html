@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JTC — Jambhe Teenagers Centre — Readiness Dashboard</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root{
     --sky:#ffffff; --bg:#e7f0f7; --surface:#ffffff; --surface2:#f1f7fc; --text:#1d3444; --muted:#647784;
@@ -176,6 +177,8 @@
   .grp-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px;}
   .grp-head h3{font-size:17px;}
   .grp-head span{font-size:12.5px; color:var(--muted); font-family:sans-serif;}
+  .dlbar{margin:18px 0 6px; display:flex; justify-content:center;}
+  .dlbar button{font-size:14px; padding:11px 22px;}
   .tasklink{cursor:pointer; border-bottom:1px dotted var(--muted);}
   .tasklink:hover{color:var(--accent); border-bottom-color:var(--accent);}
   .dt-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-bottom:12px; font-family:sans-serif;}
@@ -872,11 +875,12 @@ function openFilter(kind){
 /* =====================================================
    RENDER
    ===================================================== */
-function render(){ renderTabs(); if(currentTab==="Overview") renderOverview(); else if(currentTab==="Groups") renderGroups(); else renderSegment(currentTab); }
+function render(){ renderTabs(); if(currentTab==="Overview") renderOverview(); else if(currentTab==="Groups") renderGroups(); else if(currentTab==="Inventory") renderInventory(); else renderSegment(currentTab); }
 function renderTabs(){
   const el=document.getElementById("tabs");
   let html=`<button class="tab ${currentTab==="Overview"?"active":""}" onclick="switchTab('Overview')">📊 Overview</button>`;
-  html+=`<button class="tab ${currentTab==="Groups"?"active":""}" onclick="switchTab('Groups')">🧺 Order Groups</button>`;
+  html+=`<button class="tab ${currentTab==="Groups"?"active":""}" onclick="switchTab('Groups')">📂 Categories</button>`;
+  html+=`<button class="tab ${currentTab==="Inventory"?"active":""}" onclick="switchTab('Inventory')">📦 Inventory</button>`;
   for(const s of state.segments){
     const n=segTasks(s.name).length;
     html+=`<button class="tab ${currentTab===s.name?"active":""}" onclick="switchTab('${esc(s.name).replace(/'/g,"\\'")}')">${esc(s.name)}<span class="cnt">${n}</span></button>`;
@@ -951,7 +955,7 @@ function renderGroups(){
   const groups={};
   for(const x of state.tasks){ const c=(x.category&&String(x.category).trim())?String(x.category).trim():"Uncategorised"; (groups[c]=groups[c]||[]).push(x); }
   const names=Object.keys(groups).sort((a,b)=> a==="Uncategorised"?1:(b==="Uncategorised"?-1:a.localeCompare(b)));
-  let html=`<div class="seg-head"><h2>🧺 Order Groups</h2><span class="totals">Common items grouped by category across every segment — ready to send to a vendor</span></div>`;
+  let html=`<div class="seg-head"><h2>📂 Categories</h2><span class="totals">Items grouped by category across every segment — ready to send to a vendor</span></div>`;
   if(!state.tasks.length){ document.getElementById("content").innerHTML=html+`<div class="seg-note">No tasks yet.</div>`; return; }
   const uncatN=(groups["Uncategorised"]||[]).length;
   if(uncatN) html+=`<div class="seg-note">ℹ️ ${uncatN} item(s) have no category yet. Open a task (✏️) and set a <b>Category</b> like “AV / Sound” to club it with related items here.</div>`;
@@ -978,7 +982,72 @@ function renderGroups(){
     }
     html+=`</tbody><tfoot><tr><td colspan="5">Group total</td><td class="cost">${inr(totalCost)}</td>${admin?"<td></td>":""}</tr></tfoot></table></div></div>`;
   }
+  html+=`<div class="dlbar"><button class="btn-primary" onclick="downloadCategoriesXlsx()">⬇ Download Categories as Excel (with Comments tab)</button></div>`;
   document.getElementById("content").innerHTML=html;
+}
+
+/* ---- inventory (completed / procured items) ---- */
+function renderInventory(){
+  const done=state.tasks.filter(x=>x.stage==="Completed");
+  const totalCost=done.reduce((a,x)=>a+(Number(x.cost)||0),0);
+  let html=`<div class="seg-head"><h2>📦 Inventory</h2><span class="totals">Items marked Completed — what's been procured · ${done.length} item(s) · total ${inr(totalCost)}</span></div>`;
+  if(!done.length){ document.getElementById("content").innerHTML=html+`<div class="seg-note">Nothing here yet. When a task's stage is set to <b>Completed</b>, it appears here as procured inventory (it also stays in its segment, marked Completed).</div>`; return; }
+  const groups={};
+  for(const x of done){ const c=(x.category&&String(x.category).trim())?String(x.category).trim():"Uncategorised"; (groups[c]=groups[c]||[]).push(x); }
+  const names=Object.keys(groups).sort((a,b)=> a==="Uncategorised"?1:(b==="Uncategorised"?-1:a.localeCompare(b)));
+  for(const c of names){
+    const items=groups[c].slice().sort((a,b)=>a.task.localeCompare(b.task));
+    const gt=items.reduce((a,x)=>a+(Number(x.cost)||0),0);
+    html+=`<div class="grp"><div class="grp-head"><h3>${esc(c)}</h3><span>${items.length} item(s) · ${inr(gt)}</span></div>
+      <div class="tablewrap"><table><thead><tr><th>Item</th><th>Segment</th><th style="text-align:center">Qty</th><th>Owner(s)</th><th style="text-align:right">Cost (₹)</th></tr></thead><tbody>`;
+    for(const x of items){ html+=`<tr><td class="taskname"><span class="tasklink" onclick="openTask('${x.id}')">${esc(x.task)}</span></td><td>${esc(x.segment)}</td><td class="qty">${qtyDisp(x)}</td><td><div class="chips">${ownerChips(ownersOf(x))}</div></td><td class="cost">${inr(x.cost)}</td></tr>`; }
+    html+=`</tbody><tfoot><tr><td colspan="4">Group total</td><td class="cost">${inr(gt)}</td></tr></tfoot></table></div></div>`;
+  }
+  html+=`<div class="dlbar"><button class="btn-primary" onclick="downloadInventoryXlsx()">⬇ Download Inventory as Excel (to share with ATs)</button></div>`;
+  document.getElementById("content").innerHTML=html;
+}
+
+/* ---- Excel (.xlsx) downloads ---- */
+function downloadCategoriesXlsx(){
+  if(!window.XLSX){ toast("Excel is still loading — try again in a moment"); return; }
+  const wb=XLSX.utils.book_new();
+  const catRows=[["Category","Task","Segment","Qty","Owner(s)","Team leader","Priority","Stage","Cost (INR)","Latest status","Details"]];
+  const groups={};
+  for(const x of state.tasks){ const c=(x.category&&String(x.category).trim())?String(x.category).trim():"Uncategorised"; (groups[c]=groups[c]||[]).push(x); }
+  const names=Object.keys(groups).sort((a,b)=> a==="Uncategorised"?1:(b==="Uncategorised"?-1:a.localeCompare(b)));
+  for(const c of names){
+    const items=groups[c].slice().sort((a,b)=>a.task.localeCompare(b.task));
+    for(const x of items){ const ll=latestStatus(x.id); const ow=ownersOf(x);
+      catRows.push([c,x.task,x.segment,(x.quantity??""),ow.join(", "),ow[0]||"",prio(x),STAGE_LABELS[x.stage]||x.stage,Number(x.cost)||0,ll?ll.text:"",x.details||""]); }
+    catRows.push([c+" — total","","","","","","","",items.reduce((a,x)=>a+(Number(x.cost)||0),0),"",""]);
+    catRows.push([]);
+  }
+  catRows.push([]); catRows.push(["— Add items on site below —"]);
+  for(let k=0;k<20;k++) catRows.push(["","","","","","","","","","",""]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(catRows), "Categories");
+  const cRows=[["Task","Segment","Category","Date","By","Comment"]];
+  const byId={}; state.tasks.forEach(t=>byId[t.id]=t);
+  (state.logs||[]).slice().sort((a,b)=> String(a.ts)<String(b.ts)?1:-1).forEach(e=>{ const t=byId[e.taskId]||{}; cRows.push([t.task||"",t.segment||"",t.category||"",fmtTs(e.ts),nameOf(e.user),e.comment]); });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cRows), "Comments");
+  XLSX.writeFile(wb, "JTC-Categories-"+new Date().toISOString().slice(0,10)+".xlsx");
+  toast("Excel downloaded");
+}
+function downloadInventoryXlsx(){
+  if(!window.XLSX){ toast("Excel is still loading — try again in a moment"); return; }
+  const done=state.tasks.filter(x=>x.stage==="Completed");
+  const wb=XLSX.utils.book_new();
+  const rows=[["Item","Category","Segment","Qty","Owner(s)","Cost (INR)","Latest status"]];
+  done.slice().sort((a,b)=> (a.category||"").localeCompare(b.category||"")||a.task.localeCompare(b.task)).forEach(x=>{ const ll=latestStatus(x.id); rows.push([x.task,x.category||"",x.segment,(x.quantity??""),ownersOf(x).join(", "),Number(x.cost)||0,ll?ll.text:""]); });
+  rows.push([]); rows.push(["Total procured","","","","",done.reduce((a,x)=>a+(Number(x.cost)||0),0),""]);
+  rows.push([]); rows.push(["— Add items on site below —"]);
+  for(let k=0;k<20;k++) rows.push(["","","","","","",""]);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Inventory");
+  const doneIds=new Set(done.map(x=>x.id)); const byId={}; done.forEach(t=>byId[t.id]=t);
+  const cRows=[["Item","Segment","Date","By","Comment"]];
+  (state.logs||[]).filter(e=>doneIds.has(e.taskId)).sort((a,b)=> String(a.ts)<String(b.ts)?1:-1).forEach(e=>{ const t=byId[e.taskId]||{}; cRows.push([t.task||"",t.segment||"",fmtTs(e.ts),nameOf(e.user),e.comment]); });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cRows), "Comments");
+  XLSX.writeFile(wb, "JTC-Inventory-"+new Date().toISOString().slice(0,10)+".xlsx");
+  toast("Inventory Excel downloaded");
 }
 
 /* ---- calendar ---- */
