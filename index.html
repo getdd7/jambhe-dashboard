@@ -179,6 +179,14 @@
   .grp-head span{font-size:12.5px; color:var(--muted); font-family:sans-serif;}
   .dlbar{margin:18px 0 6px; display:flex; justify-content:center;}
   .dlbar button{font-size:14px; padding:11px 22px;}
+  .fxtable{width:100%; border-collapse:collapse; font-family:sans-serif; font-size:13px; min-width:920px;}
+  .fxtable th{background:var(--accent); color:#fff; padding:8px 6px; border:1px solid var(--border); font-size:11.5px; text-align:center; white-space:nowrap;}
+  .fxtable td{border:1px solid var(--border); padding:4px 6px; text-align:center;}
+  .fxtable td.item{text-align:left; font-weight:600;}
+  .fxtable tr:nth-child(even) td{background:var(--surface2);}
+  .fxtable input{width:54px; border:1px solid transparent; background:transparent; text-align:center; color:var(--text); border-radius:5px; font-size:13px; padding:3px;}
+  .fxtable input:hover,.fxtable input:focus{border-color:var(--accent); background:var(--surface); outline:none;}
+  .fx-total td{font-weight:800; background:var(--accent-soft) !important; color:var(--accent);}
   .tasklink{cursor:pointer; border-bottom:1px dotted var(--muted);}
   .tasklink:hover{color:var(--accent); border-bottom-color:var(--accent);}
   .dt-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-bottom:12px; font-family:sans-serif;}
@@ -875,12 +883,13 @@ function openFilter(kind){
 /* =====================================================
    RENDER
    ===================================================== */
-function render(){ renderTabs(); if(currentTab==="Overview") renderOverview(); else if(currentTab==="Groups") renderGroups(); else if(currentTab==="Inventory") renderInventory(); else renderSegment(currentTab); }
+function render(){ renderTabs(); if(currentTab==="Overview") renderOverview(); else if(currentTab==="Groups") renderGroups(); else if(currentTab==="Inventory") renderInventory(); else if(currentTab==="Fixtures") renderFixtures(); else renderSegment(currentTab); }
 function renderTabs(){
   const el=document.getElementById("tabs");
   let html=`<button class="tab ${currentTab==="Overview"?"active":""}" onclick="switchTab('Overview')">📊 Overview</button>`;
   html+=`<button class="tab ${currentTab==="Groups"?"active":""}" onclick="switchTab('Groups')">📂 Categories</button>`;
   html+=`<button class="tab ${currentTab==="Inventory"?"active":""}" onclick="switchTab('Inventory')">📦 Inventory</button>`;
+  html+=`<button class="tab ${currentTab==="Fixtures"?"active":""}" onclick="switchTab('Fixtures')">🏢 Fixtures</button>`;
   for(const s of state.segments){
     const n=segTasks(s.name).length;
     html+=`<button class="tab ${currentTab===s.name?"active":""}" onclick="switchTab('${esc(s.name).replace(/'/g,"\\'")}')">${esc(s.name)}<span class="cnt">${n}</span></button>`;
@@ -1078,6 +1087,79 @@ function downloadInventoryXlsx(){
   { const w=XLSX.utils.aoa_to_sheet(cRows); styleWS_(w,[4]); XLSX.utils.book_append_sheet(wb, w, "Comments"); }
   XLSX.writeFile(wb, "JTC-Inventory-"+new Date().toISOString().slice(0,10)+".xlsx");
   toast("Inventory Excel downloaded");
+}
+
+/* ---- fixtures & fittings (overall inventory) ---- */
+const FIXTURES={
+  title:"Maharashtra Mahila Udyam Trust — List of Fixtures & Fittings",
+  subtitle:"Teenagers Vipassana Centre, Jambe, Pune",
+  cols:["No.","Item with Specification","Campus","Hostel","Quarter","Med. Hall","Girls Toilet","Boys Toilets","Canteen","Total Qty"],
+  rows:[
+    [1,"1200 mm ceiling fans","",26,"","","","",25,51],
+    [2,"900 mm ceiling fans","","","",4,"","",4,8],
+    [3,"HVLS fan","","","",1,"","","",1],
+    [4,"1200 mm tube lights","","",3,15,3,3,21,45],
+    [5,"600 mm tube lights","",52,"","","","","",52],
+    [6,"300 mm tube lights","",26,"","","","","",26],
+    [7,"Round ceiling lamps","",34,"",4,"","",4,42],
+    [8,"Push cocks","",26,2,"",6,1,4,39],
+    [9,"Health faucets","",24,2,"",4,1,4,35],
+    [10,"Two-way cocks","",24,2,"",4,1,4,35],
+    [11,"Pillar cocks","",52,3,"","","",21,76],
+    [12,"Angle cocks","",52,5,"","","",24,81],
+    [13,"Bathroom cocks","",26,2,"",2,"","",30],
+    [14,"3 HP fire pumps at terrace","",1,"","","","",1,2],
+    [15,"3 HP submersible water pumps",1,1,"","","","",1,3],
+    [16,"Water pump starter",1,1,"","","","",1,3],
+    [17,"Fire hose pipes with box",4,"","",1,"","",2,7],
+    [18,"Street lights",22,"","","","","","",22],
+    [19,"4 Kg ABC fire extinguishers","","","","","","","",19],
+    [20,"Industrial roof exhaust fans","","","",4,"","",3,7]
+  ]
+};
+function renderFixtures(){
+  const f=FIXTURES;
+  let html=`<div class="seg-head"><h2>🏢 Fixtures &amp; Fittings</h2><span class="totals">${esc(f.subtitle)} · overall inventory — editable, download as Excel</span></div>`;
+  html+=`<div class="dlbar" style="margin-top:0"><button class="btn-primary" onclick="downloadFixturesXlsx()">⬇ Download as Excel</button></div>`;
+  html+=`<div class="tablewrap"><table class="fxtable"><thead><tr>`;
+  f.cols.forEach(c=> html+=`<th>${esc(c)}</th>`);
+  html+=`</tr></thead><tbody>`;
+  const colsum=[0,0,0,0,0,0,0]; let gt=0;
+  f.rows.forEach((row,ri)=>{
+    html+=`<tr>`;
+    row.forEach((v,ci)=>{
+      if(ci===0) html+=`<td>${v}</td>`;
+      else if(ci===1) html+=`<td class="item">${esc(v)}</td>`;
+      else html+=`<td><input type="number" min="0" data-r="${ri}" data-c="${ci}" value="${v===''?'':v}"></td>`;
+    });
+    html+=`</tr>`;
+    for(let ci=2;ci<=8;ci++){ if(typeof row[ci]==="number") colsum[ci-2]+=row[ci]; }
+    gt+=(typeof row[9]==="number"?row[9]:0);
+  });
+  html+=`<tr class="fx-total"><td></td><td class="item">TOTAL</td>`;
+  colsum.forEach(s=> html+=`<td>${s}</td>`);
+  html+=`<td>${gt}</td></tr>`;
+  html+=`</tbody></table></div>`;
+  html+=`<div class="seg-note" style="margin-top:12px">✏️ Tap any number to update it, then <b>Download as Excel</b> for a fresh copy to share with the ATs. Rows 15, 16 &amp; 19 — location split to be verified. (Edits here are for your download; ask me if you'd like them saved online for everyone.)</div>`;
+  document.getElementById("content").innerHTML=html;
+}
+function downloadFixturesXlsx(){
+  if(!window.XLSX){ toast("Excel is still loading — try again in a moment"); return; }
+  const f=FIXTURES;
+  const grid=f.rows.map(r=>r.slice());
+  document.querySelectorAll('#content .fxtable input').forEach(inp=>{
+    const ri=+inp.dataset.r, ci=+inp.dataset.c, val=inp.value.trim();
+    grid[ri][ci]= val===""?"":(isNaN(+val)?val:+val);
+  });
+  const aoa=[f.cols.slice()];
+  const colsum=[0,0,0,0,0,0,0]; let gt=0;
+  grid.forEach(row=>{ aoa.push(row.slice()); for(let ci=2;ci<=8;ci++){ if(typeof row[ci]==="number") colsum[ci-2]+=row[ci]; } gt+=(typeof row[9]==="number"?row[9]:0); });
+  aoa.push(["","TOTAL",colsum[0],colsum[1],colsum[2],colsum[3],colsum[4],colsum[5],colsum[6],gt]);
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(aoa); styleWS_(ws,[1]);
+  XLSX.utils.book_append_sheet(wb, ws, "Fixtures & Fittings");
+  XLSX.writeFile(wb, "JTC-Fixtures-Fittings-"+new Date().toISOString().slice(0,10)+".xlsx");
+  toast("Excel downloaded");
 }
 
 /* ---- calendar ---- */
