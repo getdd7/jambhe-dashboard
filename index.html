@@ -187,6 +187,12 @@
   .fxtable input{width:54px; border:1px solid transparent; background:transparent; text-align:center; color:var(--text); border-radius:5px; font-size:13px; padding:3px;}
   .fxtable input:hover,.fxtable input:focus{border-color:var(--accent); background:var(--surface); outline:none;}
   .fx-total td{font-weight:800; background:var(--accent-soft) !important; color:var(--accent);}
+  .fxsubtabs{display:flex; gap:6px; flex-wrap:wrap; margin:0 0 12px;}
+  .fxtab{border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:999px; padding:6px 13px; cursor:pointer; font-size:12.5px; font-family:sans-serif;}
+  .fxtab:hover{border-color:var(--accent);}
+  .fxtab.active{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600;}
+  .fx-title{font-family:sans-serif; font-weight:700; color:var(--text); margin:0 0 10px; font-size:15px;}
+  .fxtable input.fxdiff{background:var(--amber-soft); color:var(--amber); font-weight:700;}
   .tasklink{cursor:pointer; border-bottom:1px dotted var(--muted);}
   .tasklink:hover{color:var(--accent); border-bottom-color:var(--accent);}
   .dt-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-bottom:12px; font-family:sans-serif;}
@@ -1117,49 +1123,161 @@ const FIXTURES={
     [20,"Industrial roof exhaust fans","","","",4,"","",3,7]
   ]
 };
+/* Each sheet: key, label (sub-tab button), title, cols, labelCols (rendered as static text),
+   rows, wrap (xlsx col index to wrap), note. All other cells are editable inputs. */
+let fxSub="orig";
+const FX_SHEETS=[
+  { key:"orig", label:"Fixtures — Original", title:"Fixtures & Fittings — Original list (installed by the engineer, ~2 yrs ago)",
+    cols:FIXTURES.cols, labelCols:[0,1], wrap:1, rows:FIXTURES.rows.map(r=>r.slice()),
+    note:"The engineer's handover list. Rows 15, 16 &amp; 19 — location split still to be verified." },
+  { key:"current", label:"Fixtures — Current (Team)", title:"Fixtures & Fittings — Current status (verified on site by our team)",
+    cols:["No.","Item","Original Qty","Current Qty (Team)"], labelCols:[0,1,2], wrap:1,
+    rows:[
+      [1,"1200 mm ceiling fans",51,51],[2,"900 mm ceiling fans",8,8],[3,"HVLS fan",1,1],
+      [4,"1200 mm tube lights",45,42],[5,"600 mm tube lights",52,52],[6,"300 mm tube lights",26,26],
+      [7,"Round ceiling lamps",42,42],[8,"Push cocks",39,39],[9,"Health faucets",35,35],
+      [10,"Two-way cocks",35,35],[11,"Pillar cocks",76,76],[12,"Angle cocks",81,79],
+      [13,"Bathroom cocks",30,30],[14,"3 HP fire pumps at terrace",2,2],[15,"3 HP submersible water pumps",1,1],
+      [16,"Water pump starter",3,3],[17,"Fire hose pipes with box",7,7],[18,"Street lights",22,22],
+      [19,"4 Kg ABC fire extinguishers",19,19],[20,"Industrial roof exhaust fans",7,7]
+    ],
+    note:"Side-by-side check of what the team actually found. Cells where Current differs from Original are highlighted (so far: 1200 mm tubes 45→42, angle cocks 81→79). Update any Current figure, then download." },
+  { key:"residence", label:"Residence Rooms", title:"Residence — room-by-room condition survey",
+    cols:["Floor","Room","Tube","Fan","WC","Type","Bulbs","Basin","Bath","Remarks"], labelCols:[0,1], wrap:9,
+    rows:[
+      ["GF","1","OK","OK","OK","W",1,"OK","OK","Bulb count to confirm"],
+      ["GF","2","OK","OK","OK","I",2,"OK","OK",""],
+      ["GF","3A","OK","OK","OK","I",2,"OK","OK","Used as store; flush to check"],
+      ["GF","4","OK","OK","OK","W",2,"Fitting","OK","Basin fitting to fix"],
+      ["GF","5","OK","OK","OK","W",2,"OK","OK",""],
+      ["GF","6","OK","OK","OK","W",2,"OK","OK",""],
+      ["GF","7","OK","OK","OK","W",2,"OK","OK",""],
+      ["GF","8","OK","OK","OK","W",2,"OK","OK",""],
+      ["GF","9","OK","OK","OK","W",2,"OK","OK",""],
+      ["GF","10","OK","OK","OK","W",2,"OK","OK",""],
+      ["GF","11","OK","OK","OK","W",2,"OK","OK",""],
+      ["GF","12","OK","OK","OK","W",2,"OK","OK",""],
+      ["GF","13","OK","Noise","OK","W",2,"OK","OK","Fan noise"],
+      ["1F","14","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","15","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","16","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","17","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","18","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","19","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","20","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","21","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","22","OK","OK","OK","W",2,"OK","OK","Seat cover to replace"],
+      ["1F","23","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","24","OK","OK","OK","W",2,"OK","OK",""],
+      ["1F","25","OK","OK","Leak","W",2,"OK","OK","Flush leak"],
+      ["1F","26","OK","OK","OK","W",2,"OK","OK",""],
+      ["GF","Store","2","—","—","—","—","—","—","Store room"]
+    ],
+    note:"Type: W = Western WC, I = Indian WC. Edit any cell (OK / issue text or counts), then download. Bath column added as requested." },
+  { key:"toilets", label:"Public Toilets", title:"Public Toilets — Male &amp; Female blocks",
+    cols:["Block","Fixture","Qty","Type / Notes"], labelCols:[0,1], wrap:3,
+    rows:[
+      ["Female","Toilets (WC)",6,"2 Indian, 4 Western — 1 flush faulty"],
+      ["Female","Wash basins",4,""],
+      ["Female","Tube lights",4,""],
+      ["Male","WC",1,""],
+      ["Male","Urinals",8,""],
+      ["Male","Wash basins",4,""],
+      ["Male","Tube lights",4,""]
+    ], note:"" },
+  { key:"dining", label:"Dining & Kitchen", title:"Dining Hall &amp; Kitchen",
+    cols:["Area","Item","Size","Qty"], labelCols:[0,1,2], wrap:1,
+    rows:[
+      ["Dining","Ceiling fans","1200 mm",12],
+      ["Dining","Tube lights","1200 mm",10],
+      ["Kitchen","Ceiling fans","900 mm",2],
+      ["Kitchen","Tube lights","1200 mm",2],
+      ["Kitchen","Exhaust fan","—",1]
+    ], note:"" },
+  { key:"mini", label:"Mini Dhamma Hall", title:"Mini Dhamma Hall",
+    cols:["Item","Qty","Notes"], labelCols:[0], wrap:2,
+    rows:[["Ceiling fans",6,"All working"],["Tube lights",8,""],["Round lamps",2,""]], note:"" },
+  { key:"mgmt", label:"Mgmt Office", title:"Management Office",
+    cols:["Item","Qty","Notes"], labelCols:[0], wrap:2,
+    rows:[["Tube light",1,""],["Bulb holder",1,""],["Ceiling fan",1,"Small"]], note:"" },
+  { key:"required", label:"Required Items", title:"Required / Pending items to procure",
+    cols:["Category","Item","Qty","Notes"], labelCols:[0,1], wrap:3,
+    rows:[
+      ["Bedding & Linen","Mattresses",3,""],
+      ["Bedding & Linen","Bedsheets",3,""],
+      ["Bedding & Linen","Pillows","","Qty to confirm"],
+      ["Bedding & Linen","Mosquito nets","",""],
+      ["Bathroom","Buckets",2,""],
+      ["Bathroom","Mugs",2,""],
+      ["Bathroom","Soap stands","",""],
+      ["Bathroom","Hanging rail (patti)","",""],
+      ["Housekeeping","Broom","",""],
+      ["Housekeeping","Pipe brush","",""],
+      ["Housekeeping","WD-40 spray","","Doors & locks"],
+      ["Housekeeping","Curtains & pipe rods","",""],
+      ["Maintenance","Grass cutter machine",1,""],
+      ["Maintenance","1st-floor lobby grilles","",""],
+      ["Maintenance","Roof-top safety door","",""],
+      ["Common / Pending","Mirrors","",""],
+      ["Common / Pending","Towel rods","",""],
+      ["Common / Pending","Room number tags","",""]
+    ], note:"" }
+];
 function renderFixtures(){
-  const f=FIXTURES;
-  let html=`<div class="seg-head"><h2>🏢 Fixtures &amp; Fittings</h2><span class="totals">${esc(f.subtitle)} · overall inventory — editable, download as Excel</span></div>`;
-  html+=`<div class="dlbar" style="margin-top:0"><button class="btn-primary" onclick="downloadFixturesXlsx()">⬇ Download as Excel</button></div>`;
+  const sub=FX_SHEETS.find(s=>s.key===fxSub) || FX_SHEETS[0]; fxSub=sub.key;
+  let html=`<div class="seg-head"><h2>🏢 Fixtures &amp; Assets</h2><span class="totals">On-site inventory — pick a section, edit any cell, download as Excel</span></div>`;
+  html+=`<div class="fxsubtabs">`;
+  FX_SHEETS.forEach(s=> html+=`<button class="fxtab ${s.key===fxSub?'active':''}" onclick="switchFx('${s.key}')">${esc(s.label)}</button>`);
+  html+=`</div>`;
+  html+=`<div class="fx-title">${esc(sub.title)}</div>`;
+  html+=`<div class="dlbar" style="margin-top:0;justify-content:flex-start;gap:10px"><button class="btn-primary" onclick="downloadFxSheet()">⬇ Download this sheet</button><button class="btn-secondary" onclick="downloadFxAll()">⬇ Download all sections (workbook)</button></div>`;
   html+=`<div class="tablewrap"><table class="fxtable"><thead><tr>`;
-  f.cols.forEach(c=> html+=`<th>${esc(c)}</th>`);
+  sub.cols.forEach(c=> html+=`<th>${esc(c)}</th>`);
   html+=`</tr></thead><tbody>`;
-  const colsum=[0,0,0,0,0,0,0]; let gt=0;
-  f.rows.forEach((row,ri)=>{
+  sub.rows.forEach((row,ri)=>{
     html+=`<tr>`;
     row.forEach((v,ci)=>{
-      if(ci===0) html+=`<td>${v}</td>`;
-      else if(ci===1) html+=`<td class="item">${esc(v)}</td>`;
-      else html+=`<td><input type="number" min="0" data-r="${ri}" data-c="${ci}" value="${v===''?'':v}"></td>`;
+      if(sub.labelCols.includes(ci)){
+        html+=`<td class="${ci===1?'item':''}">${esc(v)}</td>`;
+      } else {
+        const isNum = typeof v==="number";
+        let cls="";
+        if(sub.key==="current" && ci===3 && (+v)!==(+row[2])) cls="fxdiff";
+        html+=`<td><input class="${cls}" type="${isNum?'number':'text'}" data-r="${ri}" data-c="${ci}" value="${esc(String(v))}"></td>`;
+      }
     });
     html+=`</tr>`;
-    for(let ci=2;ci<=8;ci++){ if(typeof row[ci]==="number") colsum[ci-2]+=row[ci]; }
-    gt+=(typeof row[9]==="number"?row[9]:0);
   });
-  html+=`<tr class="fx-total"><td></td><td class="item">TOTAL</td>`;
-  colsum.forEach(s=> html+=`<td>${s}</td>`);
-  html+=`<td>${gt}</td></tr>`;
   html+=`</tbody></table></div>`;
-  html+=`<div class="seg-note" style="margin-top:12px">✏️ Tap any number to update it, then <b>Download as Excel</b> for a fresh copy to share with the ATs. Rows 15, 16 &amp; 19 — location split to be verified. (Edits here are for your download; ask me if you'd like them saved online for everyone.)</div>`;
+  if(sub.note) html+=`<div class="seg-note" style="margin-top:12px">${sub.note} <span style="opacity:.75">(Edits are for your download; ask me if you'd like them saved online for everyone.)</span></div>`;
   document.getElementById("content").innerHTML=html;
 }
-function downloadFixturesXlsx(){
-  if(!window.XLSX){ toast("Excel is still loading — try again in a moment"); return; }
-  const f=FIXTURES;
-  const grid=f.rows.map(r=>r.slice());
+function captureFx(){
+  const sub=FX_SHEETS.find(s=>s.key===fxSub); if(!sub) return;
   document.querySelectorAll('#content .fxtable input').forEach(inp=>{
     const ri=+inp.dataset.r, ci=+inp.dataset.c, val=inp.value.trim();
-    grid[ri][ci]= val===""?"":(isNaN(+val)?val:+val);
+    sub.rows[ri][ci]= (val!=="" && !isNaN(+val)) ? +val : val;
   });
-  const aoa=[f.cols.slice()];
-  const colsum=[0,0,0,0,0,0,0]; let gt=0;
-  grid.forEach(row=>{ aoa.push(row.slice()); for(let ci=2;ci<=8;ci++){ if(typeof row[ci]==="number") colsum[ci-2]+=row[ci]; } gt+=(typeof row[9]==="number"?row[9]:0); });
-  aoa.push(["","TOTAL",colsum[0],colsum[1],colsum[2],colsum[3],colsum[4],colsum[5],colsum[6],gt]);
+}
+function switchFx(key){ captureFx(); fxSub=key; renderFixtures(); }
+function fxAOA(sub){ const a=[sub.cols.slice()]; sub.rows.forEach(r=>a.push(r.slice())); return a; }
+function downloadFxSheet(){
+  if(!window.XLSX){ toast("Excel is still loading — try again in a moment"); return; }
+  captureFx();
+  const sub=FX_SHEETS.find(s=>s.key===fxSub);
   const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet(aoa); styleWS_(ws,[1]);
-  XLSX.utils.book_append_sheet(wb, ws, "Fixtures & Fittings");
-  XLSX.writeFile(wb, "JTC-Fixtures-Fittings-"+new Date().toISOString().slice(0,10)+".xlsx");
+  const ws=XLSX.utils.aoa_to_sheet(fxAOA(sub)); styleWS_(ws,[sub.wrap]);
+  XLSX.utils.book_append_sheet(wb, ws, sub.label.slice(0,31));
+  XLSX.writeFile(wb, "JTC-"+sub.key+"-"+new Date().toISOString().slice(0,10)+".xlsx");
   toast("Excel downloaded");
+}
+function downloadFxAll(){
+  if(!window.XLSX){ toast("Excel is still loading — try again in a moment"); return; }
+  captureFx();
+  const wb=XLSX.utils.book_new();
+  FX_SHEETS.forEach(sub=>{ const ws=XLSX.utils.aoa_to_sheet(fxAOA(sub)); styleWS_(ws,[sub.wrap]); XLSX.utils.book_append_sheet(wb, ws, sub.label.slice(0,31)); });
+  XLSX.writeFile(wb, "JTC-Fixtures-Inventory-"+new Date().toISOString().slice(0,10)+".xlsx");
+  toast("Workbook downloaded");
 }
 
 /* ---- calendar ---- */
